@@ -263,7 +263,8 @@ for q = 1:4
     plot(t, resultsPID.quality.(qFields{q}),  'Color', cPID,  'LineWidth', 1.4, 'DisplayName', 'Decentralized PID'); hold on;
     plot(t, resultsPP.quality.(qFields{q}),   'Color', cPP,   'LineWidth', 1.4, 'DisplayName', 'Pole Placement');
     plot(t, resultsLQRI.quality.(qFields{q}), 'Color', cLQRI, 'LineWidth', 1.8, 'DisplayName', 'LQR-I');
-    grid on; box on; ylim([70, 102]);
+    grid on; box on; ylim([65, 108]);
+    set(ax, 'YTick', 70:5:100);
     xlabel('Normalized Time (hours)', 'FontWeight', 'bold');
     ylabel('Suitability Score (0-100)', 'FontWeight', 'bold');
     title(qLabels{q}, 'FontWeight', 'bold', 'FontSize', 10);
@@ -390,41 +391,71 @@ function db = getOnlineTomatoDatabaseLocal()
         'Wageningen UR Crop Modeling: https://www.wur.nl/en/research-results/research-institutes/plant-research/greenhouse-horticulture.htm'
     };
 
-    % 5 Botanical Growth Phases with Online Agronomic Optimums:
+    % 5 Botanical Growth Phases with Online Agronomic Optimums (FAO-56 & UC Davis VRIC):
+    % Stage 1: Germination / Seedling (0-2h)
     db.phase(1).name = 'Germination';
     db.phase(1).tSpan= [0, 2];
     db.phase(1).T_sp = 24.0; db.phase(1).T_range = [20, 28];
     db.phase(1).H_sp = 72.5; db.phase(1).H_range = [65, 80];
     db.phase(1).M_sp = 70.0; db.phase(1).M_range = [60, 80];
     db.phase(1).L_sp = 10000;db.phase(1).L_range = [5000, 15000];
+    db.phase(1).pH_range = [6.0, 6.6];
+    db.phase(1).EC_range = [1.6, 2.5]; % Low salinity for delicate seedling roots
+    db.phase(1).N_range  = [90, 140];
+    db.phase(1).P_range  = [30, 55];
+    db.phase(1).K_range  = [120, 180];
 
+    % Stage 2: Vegetative Canopy Growth (2-8h)
     db.phase(2).name = 'Vegetative';
     db.phase(2).tSpan= [2, 8];
     db.phase(2).T_sp = 25.0; db.phase(2).T_range = [21, 27];
     db.phase(2).H_sp = 65.0; db.phase(2).H_range = [55, 75];
     db.phase(2).M_sp = 60.0; db.phase(2).M_range = [50, 70];
     db.phase(2).L_sp = 18000;db.phase(2).L_range = [12000, 25000];
+    db.phase(2).pH_range = [6.0, 6.6];
+    db.phase(2).EC_range = [1.8, 2.7]; % Moderate EC for canopy expansion
+    db.phase(2).N_range  = [115, 165]; % Peak vegetative nitrogen requirement
+    db.phase(2).P_range  = [35, 60];
+    db.phase(2).K_range  = [140, 200];
 
+    % Stage 3: Flowering & Blossom Set (8-12h)
     db.phase(3).name = 'Flowering';
     db.phase(3).tSpan= [8, 12];
     db.phase(3).T_sp = 23.5; db.phase(3).T_range = [20, 26];
     db.phase(3).H_sp = 62.5; db.phase(3).H_range = [50, 70];
     db.phase(3).M_sp = 58.0; db.phase(3).M_range = [50, 65];
     db.phase(3).L_sp = 22500;db.phase(3).L_range = [15000, 30000];
+    db.phase(3).pH_range = [6.1, 6.7];
+    db.phase(3).EC_range = [2.0, 2.9];
+    db.phase(3).N_range  = [110, 155];
+    db.phase(3).P_range  = [40, 68];   % Elevated phosphorus for flower initiation
+    db.phase(3).K_range  = [155, 220];
 
+    % Stage 4: Fruit Development & Expansion (12-18h)
     db.phase(4).name = 'Fruit Dev.';
     db.phase(4).tSpan= [12, 18];
     db.phase(4).T_sp = 25.0; db.phase(4).T_range = [21, 28];
     db.phase(4).H_sp = 60.0; db.phase(4).H_range = [50, 70];
     db.phase(4).M_sp = 65.0; db.phase(4).M_range = [55, 75];
     db.phase(4).L_sp = 22500;db.phase(4).L_range = [15000, 30000];
+    db.phase(4).pH_range = [6.1, 6.7];
+    db.phase(4).EC_range = [2.1, 3.1]; % Higher EC for fruit sugar accumulation (Brix)
+    db.phase(4).N_range  = [105, 150];
+    db.phase(4).P_range  = [38, 62];
+    db.phase(4).K_range  = [165, 230]; % Peak potassium for fruit cell expansion
 
+    % Stage 5: Ripening & Harvest Maturity (18-24h)
     db.phase(5).name = 'Maturity';
     db.phase(5).tSpan= [18, 24];
     db.phase(5).T_sp = 22.5; db.phase(5).T_range = [18, 26];
     db.phase(5).H_sp = 55.0; db.phase(5).H_range = [45, 65];
     db.phase(5).M_sp = 55.0; db.phase(5).M_range = [45, 65];
     db.phase(5).L_sp = 20000;db.phase(5).L_range = [12000, 28000];
+    db.phase(5).pH_range = [6.0, 6.6];
+    db.phase(5).EC_range = [2.2, 3.2]; % Elevated EC enhances fruit flavor/firmness
+    db.phase(5).N_range  = [95, 140];
+    db.phase(5).P_range  = [32, 55];
+    db.phase(5).K_range  = [150, 210];
 end
 
 %% 2. Default Parameters with Explicit Soil Types
@@ -434,7 +465,9 @@ function p = getParametersLocal(db, soilType)
     end
 
     p.crop.name = db.cropName;
-    p.initialState = [60; 25; 65; 15000; 6.4; 2.5; 150; 50; 180; 80; 100];
+    % Nominal equilibrium operating point:
+    % [M=60%, T=25°C, H=65%, L=15000lux, pH=6.35, EC=2.4, N=130, P=48, K=180, Water=80%, VOC=100]
+    p.initialState = [60; 25; 65; 15000; 6.35; 2.4; 130; 48; 180; 80; 100];
     p.initialInput = [0; 0; 0; 0];
     p.disturbance.externalTemperature = 25.0;
     p.disturbance.naturalLight = 15000.0;
@@ -453,16 +486,19 @@ function p = getParametersLocal(db, soilType)
             p.soil.irrigationGain    = 14.0;  % Rapid moisture penetration
             p.soil.evapFactor        = 2.60;  % Higher moisture loss rate
             p.soil.drainageThreshold = 40.0;  % Field capacity threshold
+            p.soil.leachFactor        = 1.60;  % High nitrate/EC leaching rate
         case 'clay'
             p.soil.drainageGain      = 0.008; % Very slow drainage
             p.soil.irrigationGain    = 9.5;   % Slower percolation / runoff risk
             p.soil.evapFactor        = 1.40;  % High water binding retention
             p.soil.drainageThreshold = 65.0;  % High field retention capacity
+            p.soil.leachFactor        = 0.50;  % Strong ion binding retention
         otherwise % 'loamy'
             p.soil.drainageGain      = 0.020; % Balanced drainage (Standard)
             p.soil.irrigationGain    = 12.0;  % Balanced infiltration
             p.soil.evapFactor        = 2.00;  % Balanced evaporation
             p.soil.drainageThreshold = 50.0;  % Normal loamy threshold
+            p.soil.leachFactor        = 1.00;  % Balanced nutrient retention
     end
 end
 
@@ -527,20 +563,25 @@ function dx = Tomato_Dynamics(x, u, d, params)
     % 4. Total Illumination (lux/h)
     dL = 0.5 * (natL - L) + 30000.0 * growLight;
 
-    % 5. Soil pH
-    dpH = 0.01 * (6.4 - pH) + 0.002 * pump;
+    % 5. Transpiration-driven crop metabolic activity
+    transpiration = (0.50 + 0.50 * (L / 25000.0)) * (1.0 + 0.02 * max(T - 22, 0));
+    leachFac = 1.0;
+    if isfield(soil, 'leachFactor'), leachFac = soil.leachFactor; end
 
-    % 6. Soil EC (dS/m)
-    dEC = 0.02 * (2.8 - EC) * pump - 0.005 * (EC - 2.0) * (1 - pump);
+    % 5. Soil pH (buffered around 6.35, modulated by fertigation & nitrification)
+    dpH = 0.04 * (6.35 - pH) + 0.02 * (6.45 - pH) * pump - 0.0002 * max(N - 140, 0);
 
-    % 7. Nitrogen (mg/kg)
-    dN = 0.015 * (120.0 - N) - 0.03 * pump;
+    % 6. Soil EC (dS/m) - fertigation adds salts, drainage leaches excess ions
+    dEC = 0.55 * pump - 0.05 * (evap / 0.8) - 0.03 * leachFac * drainage * EC + 0.02 * (2.4 - EC);
 
-    % 8. Phosphorus (mg/kg)
-    dP = 0.010 * (50.0 - P) - 0.01 * pump;
+    % 7. Nitrogen (mg/kg) - Fertigation delivery, plant vegetative uptake, drainage leaching
+    dN = 22.0 * pump - 3.8 * transpiration - 0.05 * leachFac * drainage * (N / 100.0) + 0.03 * (130.0 - N);
 
-    % 9. Potassium (mg/kg)
-    dK = 0.015 * (170.0 - K) - 0.02 * pump;
+    % 8. Phosphorus (mg/kg) - Fertigation delivery, blossom uptake, drainage leaching
+    dP = 7.5 * pump - 1.2 * transpiration - 0.02 * leachFac * drainage * (P / 50.0) + 0.02 * (48.0 - P);
+
+    % 9. Potassium (mg/kg) - Fertigation delivery, fruit expansion uptake, drainage leaching
+    dK = 28.0 * pump - 4.8 * transpiration - 0.04 * leachFac * drainage * (K / 150.0) + 0.03 * (190.0 - K);
 
     % 10. Water Level Tank (%)
     dWater = -(0.5 * evap + 0.2 * pump);
@@ -926,8 +967,11 @@ function [qEnv, qSoil, qNutr, qTot] = calcQualityOnlineLocal(T, H, M, L, pH, EC,
              rSc(H, phaseData.H_range(1), phaseData.H_range(2)) + ...
              rSc(M, phaseData.M_range(1), phaseData.M_range(2)) + ...
              rSc(L, phaseData.L_range(1), phaseData.L_range(2))) / 4.0;
-    qSoil = (rSc(pH, 5.8, 6.6) + rSc(EC, 1.8, 3.2)) / 2.0;
-    qNutr = (rSc(N, 100, 200) + rSc(P, 30, 80) + rSc(K, 120, 260)) / 3.0;
+    qSoil = (rSc(pH, phaseData.pH_range(1), phaseData.pH_range(2)) + ...
+             rSc(EC, phaseData.EC_range(1), phaseData.EC_range(2))) / 2.0;
+    qNutr = (rSc(N, phaseData.N_range(1), phaseData.N_range(2)) + ...
+             rSc(P, phaseData.P_range(1), phaseData.P_range(2)) + ...
+             rSc(K, phaseData.K_range(1), phaseData.K_range(2))) / 3.0;
     qTot  = max(0, min(100, 0.50 * qEnv + 0.25 * qSoil + 0.25 * qNutr));
 end
 
@@ -935,9 +979,9 @@ function s = rSc(val, low, high)
     if val >= low && val <= high
         s = 100.0;
     elseif val < low
-        s = max(0.0, 100.0 - ((low - val) / max(low * 0.3, 1.0)) * 100.0);
+        s = max(0.0, 100.0 - ((low - val) / max(low * 0.40, 1.0)) * 100.0);
     else
-        s = max(0.0, 100.0 - ((val - high) / max(high * 0.3, 1.0)) * 100.0);
+        s = max(0.0, 100.0 - ((val - high) / max(high * 0.40, 1.0)) * 100.0);
     end
 end
 
@@ -955,13 +999,13 @@ function drawGrowthPhasesLocal(ax, showTextBadges)
     if showTextBadges
         phaseMidPoints = [1.0, 5.0, 10.0, 15.0, 21.0];
         phaseLabels    = {'Germination', 'Vegetative', 'Flowering', 'Fruit Dev.', 'Maturity'};
-        yTextPos       = yLimits(2) - 0.05 * (yLimits(2) - yLimits(1));
+        yTextPos       = yLimits(2) - 0.025 * (yLimits(2) - yLimits(1));
 
         for p = 1:5
             text(ax, phaseMidPoints(p), yTextPos, phaseLabels{p}, ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', ...
                 'FontSize', 7.5, 'FontWeight', 'bold', 'Color', [0.25, 0.25, 0.25], ...
-                'BackgroundColor', [0.96, 0.96, 0.96, 0.75], 'EdgeColor', [0.7, 0.7, 0.7], ...
+                'BackgroundColor', [0.96, 0.96, 0.96, 0.85], 'EdgeColor', [0.7, 0.7, 0.7], ...
                 'Margin', 1.5, 'HandleVisibility', 'off');
         end
     end
