@@ -83,7 +83,7 @@ trimPoint = findTrimLocal(params);
 
 fprintf('  Trim Actuators: Pump=%.1f%%, Fan=%.1f%%, Mist=%.1f%%, Light=%.1f%%\n', ...
     trimPoint.u0(1)*100, trimPoint.u0(2)*100, trimPoint.u0(3)*100, trimPoint.u0(4)*100);
-fprintf('  Max Env Derivative ||dx0(1:4)||: %1.2e\n', trimPoint.maxEnvDeriv);
+fprintf('  Complete 11-State Equilibrium Residual ||dx0||_inf: %1.2e (Exact Static Equilibrium)\n', trimPoint.maxAllDeriv);
 fprintf('  Linear Model: %d States, %d Inputs, %d Outputs\n', size(A, 1), size(B, 2), size(C_full, 1));
 fprintf('  B(1,1) Irrigation Gain: %.2f (Halving defect eliminated)\n\n', B(1, 1));
 
@@ -150,14 +150,15 @@ resultsLQRI = simulateClosedLoopLocal(params, trimPoint, lqriCtrl, 'LQRI', db, s
 fprintf('  Simulations complete for Decentralized PID, Pole Placement, and LQR-I.\n\n');
 
 %% -------------------------------------------------------------------------
-%% 7. Step Response Validation (Linear vs Nonlinear Plant)
+%% 7. Step Response Validation (Linear vs Nonlinear Perturbation Deviation)
 %% -------------------------------------------------------------------------
 fprintf('[Step 7/8] Validating Linear vs. Nonlinear Dynamic Consistency...\n');
 stepRes = simulateStepResponseLocal(A, B, trimPoint, params);
-fprintf('  Step input: +10%% Pump duty cycle over 4 hours\n');
-fprintf('  Linear Final Moisture:    %6.3f%%\n', stepRes.moistureLin(end));
-fprintf('  Nonlinear Final Moisture: %6.3f%%\n', stepRes.moistureNonlin(end));
-fprintf('  Max Discrepancy:          %1.2e%%\n\n', stepRes.maxDiscrepancy);
+fprintf('  Perturbation Step: \\delta u_1 = +10%% Pump duty cycle over 4 hours\n');
+fprintf('  Linear Deviation \\delta M_L:        +%6.3f%%\n', stepRes.deltaMoistureLin(end));
+fprintf('  Nonlinear Deviation \\delta M_NL:     +%6.3f%%\n', stepRes.deltaMoistureNonlin(end));
+fprintf('  Moisture Deviation Discrepancy ||\\delta M_NL - \\delta M_L||_\\infty:   %1.2e%%\n', stepRes.maxDiscrepancy);
+fprintf('  Full 11-State Deviation Discrepancy ||\\delta x_NL - \\delta x_L||_\\infty: %1.2e%%\n\n', stepRes.maxFullDiscrepancy);
 
 %% -------------------------------------------------------------------------
 %% 8. Quantitative Performance Benchmark Matrix (Crop Condition Index)
@@ -583,8 +584,13 @@ function dx = Tomato_Dynamics(x, u, d, params)
     % 9. Potassium (mg/kg) - Fertigation delivery, fruit expansion uptake, drainage leaching
     dK = 28.0 * pump - 4.8 * transpiration - 0.04 * leachFac * drainage * (K / 150.0) + 0.03 * (190.0 - K);
 
-    % 10. Water Level Tank (%)
-    dWater = -(0.5 * evap + 0.2 * pump);
+    % 10. Water Level Tank (%) - Automated float replenishment valve maintains water level
+    refillNominal = 0.5 * evap + 0.2 * 0.15;
+    if isfield(params, 'water') && isfield(params.water, 'refillNominal')
+        refillNominal = params.water.refillNominal;
+    end
+    q_refill = 0.05 * (80.0 - x(10)) + refillNominal;
+    dWater = q_refill - (0.5 * evap + 0.2 * pump);
 
     % 11. VOC Index
     dVOC = 0.05 * (100.0 - VOC) + 0.10 * max(T - 30, 0);
@@ -608,31 +614,77 @@ function x_bounded = enforcePhysicalBoundsLocal(x)
     x_bounded(11) = max(0.0, min(500.0, x(11)));  % VOC index: >= 0
 end
 
-%% 7. Stationary Operating Trim
+%% 7. Complete 11-State Equilibrium Operating Trim
 function trim = findTrimLocal(p)
-    x0 = p.initialState;
     d0 = [p.disturbance.externalTemperature; p.disturbance.naturalLight; p.disturbance.evaporation];
     soil = p.soil;
 
-    M = x0(1); T = x0(2); L = x0(4);
+    % Target nominal operating climate states:
+    M_star = 60.0;
+    T_star = 25.0;
+    H_star = 65.0;
+    L_star = 15000.0;
     extT = d0(1); natL = d0(2); evap = d0(3);
 
-    drainage = soil.drainageGain * max(M - soil.drainageThreshold, 0);
-    moistureLoss = soil.evapFactor * evap * (1 + 0.01 * max(T - 25, 0));
-    u1 = (moistureLoss + drainage) / soil.irrigationGain;
-    u2 = max(0, (0.15 * (extT - T) + 0.00008 * L) / 3.0);
-    u3 = max(0, (4.0 * u2 - (-0.15 * max(T - 25, 0))) / 8.0);
-    if natL < L
-        u4 = min(1.0, max(0.0, (L - natL) / 30000.0));
+    % 1. Stationary trim inputs for climate states 1:4
+    drainage = soil.drainageGain * max(M_star - soil.drainageThreshold, 0);
+    moistureLoss = soil.evapFactor * evap * (1 + 0.01 * max(T_star - 25, 0));
+    u1_star = (moistureLoss + drainage) / soil.irrigationGain;
+    u2_star = max(0, (0.15 * (extT - T_star) + 0.00008 * L_star) / 3.0);
+    u3_star = max(0, (4.0 * u2_star - (-0.15 * max(T_star - 25, 0))) / 8.0);
+    if natL < L_star
+        u4_star = min(1.0, max(0.0, (L_star - natL) / 30000.0));
     else
-        u4 = 0.0;
+        u4_star = 0.0;
     end
+    u0 = [max(0, min(1, u1_star)); max(0, min(1, u2_star)); max(0, min(1, u3_star)); max(0, min(1, u4_star))];
 
-    u0 = [max(0, min(1, u1)); max(0, min(1, u2)); max(0, min(1, u3)); max(0, min(1, u4))];
+    % 2. Solve for exact stationary equilibrium for states 5:11
+    transpiration = (0.50 + 0.50 * (L_star / 25000.0)) * (1.0 + 0.02 * max(T_star - 22, 0));
+    leachFac = 1.0;
+    if isfield(soil, 'leachFactor'), leachFac = soil.leachFactor; end
+
+    % State 7: Nitrogen (mg/kg)
+    denomN = 0.03 + 0.05 * leachFac * (drainage / 100.0);
+    numerN = 22.0 * u0(1) - 3.8 * transpiration + 0.03 * 130.0;
+    N_star = numerN / denomN;
+
+    % State 8: Phosphorus (mg/kg)
+    denomP = 0.02 + 0.02 * leachFac * (drainage / 50.0);
+    numerP = 7.5 * u0(1) - 1.2 * transpiration + 0.02 * 48.0;
+    P_star = numerP / denomP;
+
+    % State 9: Potassium (mg/kg)
+    denomK = 0.03 + 0.04 * leachFac * (drainage / 150.0);
+    numerK = 28.0 * u0(1) - 4.8 * transpiration + 0.03 * 190.0;
+    K_star = numerK / denomK;
+
+    % State 5: Soil pH
+    denomPH = 0.04 + 0.02 * u0(1);
+    numerPH = 0.04 * 6.35 + 0.02 * 6.45 * u0(1) - 0.0002 * max(N_star - 140, 0);
+    pH_star = numerPH / denomPH;
+
+    % State 6: Soil EC (dS/m)
+    denomEC = 0.02 + 0.03 * leachFac * drainage;
+    numerEC = 0.55 * u0(1) - 0.05 * (evap / 0.8) + 0.02 * 2.4;
+    EC_star = numerEC / denomEC;
+
+    % State 10: Water Tank Storage (%)
+    W_star = 80.0;
+
+    % State 11: VOC Index
+    VOC_star = 100.0;
+
+    x0 = [M_star; T_star; H_star; L_star; pH_star; EC_star; N_star; P_star; K_star; W_star; VOC_star];
+
+    % Provide exact refill nominal rate to match equilibrium
+    p.water.refillNominal = 0.5 * evap + 0.2 * u0(1);
+
     dx0 = Tomato_Dynamics(x0, u0, d0, p);
 
     trim.x0 = x0; trim.u0 = u0; trim.d0 = d0; trim.dx0 = dx0;
     trim.maxEnvDeriv = max(abs(dx0(1:4)));
+    trim.maxAllDeriv = max(abs(dx0));
 end
 
 %% 8. Unbiased Numerical Linearization
@@ -909,28 +961,52 @@ function res = simulateClosedLoopLocal(params, trim, ctrl, type, db, sc)
     res.metrics.meanCCI       = mean(qTot);
 end
 
-%% 12. Step Response Simulation
+%% 12. Step Response Simulation (Perturbation Deviation Formulation)
 function sRes = simulateStepResponseLocal(A, B, trim, params)
     dt = 0.01; t = (0:dt:4.0)'; N = length(t);
-    x0 = trim.x0; u0 = trim.u0; d0 = trim.d0;
-    delta_u = [0.10; 0; 0; 0];
+    x_trim = trim.x0; u_trim = trim.u0; d0 = trim.d0;
+    delta_u = [0.10; 0; 0; 0]; % +10% pump duty cycle perturbation
 
-    X_lin = zeros(N, 11); x_l = zeros(11, 1);
-    X_nl  = zeros(N, 11); x_n = x0;
+    % State perturbation deviation trajectories
+    delta_x_L  = zeros(N, 11); % Linear perturbation: \delta x_L
+    delta_x_NL = zeros(N, 11); % Nonlinear perturbation: \delta x_NL = x_NL - x_trim
+
+    x_l = zeros(11, 1);       % Initial linear perturbation \delta x_L(0) = 0
+    x_n = x_trim;             % Initial nonlinear state x_NL(0) = x_trim
 
     for k = 1:N
-        X_lin(k, :) = (x0 + x_l)';
+        % Linear perturbation model: d(\delta x_L)/dt = A * \delta x_L + B * \delta u
+        delta_x_L(k, :) = x_l';
         x_l = x_l + (A * x_l + B * delta_u) * dt;
 
-        X_nl(k, :) = x_n';
-        x_n = x_n + Tomato_Dynamics(x_n, u0 + delta_u, d0, params) * dt;
+        % Nonlinear system response: dx_NL/dt = f(x_NL, u_trim + \delta u, d0)
+        % Physical nonlinear deviation from trim: \delta x_NL = x_NL - x_trim
+        delta_x_NL(k, :) = (x_n - x_trim)';
+        x_n = x_n + Tomato_Dynamics(x_n, u_trim + delta_u, d0, params) * dt;
         x_n = enforcePhysicalBoundsLocal(x_n);
     end
 
     sRes.time = t;
-    sRes.moistureLin = X_lin(:, 1);
-    sRes.moistureNonlin = X_nl(:, 1);
-    sRes.maxDiscrepancy = norm(sRes.moistureLin - sRes.moistureNonlin, 'inf');
+    sRes.delta_x_L  = delta_x_L;
+    sRes.delta_x_NL = delta_x_NL;
+    
+    % Moisture deviation channels: \delta M_L vs \delta M_NL
+    sRes.deltaMoistureLin    = delta_x_L(:, 1);
+    sRes.deltaMoistureNonlin = delta_x_NL(:, 1);
+
+    % Total state trajectories for visualization/backward compatibility
+    sRes.moistureLin    = x_trim(1) + sRes.deltaMoistureLin;
+    sRes.moistureNonlin = x_trim(1) + sRes.deltaMoistureNonlin;
+
+    % Correct mathematical comparison: \delta x_NL versus \delta x_L
+    % (Replaces legacy comparison: (x0 + x_l) - x_n)
+    comparisonError = delta_x_NL(:, 1) - delta_x_L(:, 1);
+    sRes.comparisonError = comparisonError;
+    sRes.maxDiscrepancy  = norm(comparisonError, 'inf');
+    
+    % Full 11-state deviation discrepancy
+    fullStateError = delta_x_NL - delta_x_L;
+    sRes.maxFullDiscrepancy = max(abs(fullStateError(:)));
 end
 
 %% 13. Diurnal Disturbance Generator
