@@ -174,6 +174,7 @@ All figures are automatically displayed in real time and exported to [`results/`
 * **Phase 3 (Final Phase - Edge AI, Cloud IoT & Crop Trials)**: Extended Kalman Filter (EKF) observer, Non-linear Model Predictive Control (NMPC), cloud dashboard (AWS IoT / ThingsBoard), and live biological tomato crop validation trial.
 
 For the full milestone schedule and Gantt timeline, see **[`MID_SEM_PLAN.md`](MID_SEM_PLAN.md)**.  
+For system architecture, plain-language guide & viva cheatsheet, see **[`PSEUDO.md`](PSEUDO.md)**.  
 For algorithmic step-by-step logic, see **[`PSEUDOCODE.md`](PSEUDOCODE.md)**.
 
 ---
@@ -195,6 +196,7 @@ For algorithmic step-by-step logic, see **[`PSEUDOCODE.md`](PSEUDOCODE.md)**.
 ```
 Control_System_Project/
 ├── main.m                      # Central Heart: Single-file complete project pipeline
+├── PSEUDO.md                   # System architecture, plain-language guide & viva cheatsheet
 ├── PSEUDOCODE.md               # Algorithmic pseudocode and mathematical formulation
 ├── MID_SEM_PLAN.md             # Mid-Semester progress report and 3-phase engineering plan
 ├── README.md                   # Comprehensive project documentation (this file)
