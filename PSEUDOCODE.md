@@ -20,7 +20,7 @@ Output: Performance Scorecard, Real-Time Dashboards (5 Figures), Exported Artifa
 1:  INITIALIZE system parameters with Soil Physics (Sandy, Loamy, Clay)
 2:  LOAD authoritative online botanical database (FAO-56, UC Davis, WUR)
 3:  MAP physical hardware sensors to state vector (BME280, Capacitive v1.2, BH1750, pH, EC, NPK, MQ-135)
-4:  COMPUTE equilibrium trim operating point (x0, u0*, d0) such that ||dx0(1:4)||_inf ~ 0
+4:  COMPUTE complete 11-state equilibrium trim operating point (x0, u0*, d0) such that ||dx0||_inf ~ 0 across all states
 5:  COMPUTE numerical Jacobians A = df/dx and B = df/du using forward differencing on u in [0, 1]
 6:  PERFORM modal decomposition & dual observability analysis:
       - Open-loop eigenvalues: lambda = eig(A)
@@ -43,7 +43,7 @@ Output: Performance Scorecard, Real-Time Dashboards (5 Figures), Exported Artifa
           h. Forward integrate true plant physics: x = x + Tomato_Dynamics(x, u_actual, d) * dt
         END FOR
       - COMPUTE performance indices: Total ISE, Total IAE, Total Actuator Variation (TV)
-9:  VALIDATE dynamic consistency via linear vs nonlinear step response comparison
+9:  VALIDATE dynamic consistency via perturbation deviation comparison: delta_x_NL = x_NL - x_trim versus delta_x_L
 10: RENDER 5 real-time figure windows with explicit growth phase demarcations (drawnow):
       - Fig 1: Multivariable State Tracking Dashboard
       - Fig 2: Actuator Duty Cycle Effort & Safety Interlock Saturation
@@ -91,18 +91,20 @@ Function dx = Tomato_Dynamics(x, u, d, params)
        dL = 0.5 * (natL - L) + 30000.0 * u_sat[4]
 
    10: % 5. Soil pH Derivative (dpH/dt)
-       dpH = 0.01 * (6.4 - pH) + 0.002 * u_sat[1]
+       dpH = 0.04 * (6.35 - pH) + 0.02 * (6.45 - pH) * u_sat[1] - 0.0002 * max(N - 140.0, 0.0)
 
    11: % 6. Soil EC Derivative (dEC/dt)
-       dEC = 0.02 * (2.8 - EC) * u_sat[1] - 0.005 * (EC - 2.0) * (1.0 - u_sat[1])
+       dEC = 0.55 * u_sat[1] - 0.05 * (evap / 0.8) - 0.03 * leachFac * drainage * EC + 0.02 * (2.4 - EC)
 
-   12: % 7-9. Soil Macronutrients (N, P, K)
-       dN = 0.015 * (120.0 - N) - 0.03 * u_sat[1]
-       dP = 0.010 * (50.0  - P) - 0.01 * u_sat[1]
-       dK = 0.015 * (170.0 - K) - 0.02 * u_sat[1]
+   12: % 7-9. Soil Macronutrients (N, P, K) with Crop Transpiration Uptake & Leaching
+       transpiration = (0.50 + 0.50 * (L / 25000.0)) * (1.0 + 0.02 * max(T - 22.0, 0.0))
+       dN = 22.0 * u_sat[1] - 3.8 * transpiration - 0.05 * leachFac * drainage * (N / 100.0) + 0.03 * (130.0 - N)
+       dP = 7.5  * u_sat[1] - 1.2 * transpiration - 0.02 * leachFac * drainage * (P / 50.0)  + 0.02 * (48.0  - P)
+       dK = 28.0 * u_sat[1] - 4.8 * transpiration - 0.04 * leachFac * drainage * (K / 150.0) + 0.03 * (190.0 - K)
 
-   13: % 10. Water Tank Level (dWater/dt)
-       dWater = -(0.5 * evap + 0.2 * u_sat[1])
+   13: % 10. Water Tank Level (dWater/dt) with Automated Float Replenishment Valve
+       q_refill = 0.05 * (80.0 - Water) + refillNominal
+       dWater = q_refill - (0.5 * evap + 0.2 * u_sat[1])
 
    14: % 11. VOC / Gas Index (dVOC/dt)
        dVOC = 0.05 * (100.0 - VOC) + 0.10 * max(T - 30.0, 0.0)
