@@ -1,46 +1,92 @@
-# Tomato Greenhouse Microclimate & Crop Quality Control System
-### Pure Base MATLAB Master Pipeline | 11 States | 4 Actuators | Tri-Hybrid Control
+# Tomato Greenhouse Microclimate & Crop Condition Monitoring System
+### Pure Base MATLAB Master Pipeline | 11 States | 4 Actuators | Simulated ESP32 Sensor Layer
 
 [![MATLAB](https://img.shields.io/badge/MATLAB-R2020b%2B%20%7C%20R2025b%20Tested-orange.svg)](https://www.mathworks.com/products/matlab.html)
 [![Toolboxes](https://img.shields.io/badge/Toolbox%20Dependencies-0.0%25%20(Pure%20Base%20MATLAB)-brightgreen.svg)]()
 [![Simulink](https://img.shields.io/badge/Simulink%20Dependency-0.0%25%20(Vectorized%20ODE%20Engine)-blue.svg)]()
+[![Hardware](https://img.shields.io/badge/Sensor%20Layer-Simulated%20ESP32%20Transducers-blueviolet.svg)]()
 [![Status](https://img.shields.io/badge/Phase%201-100%25%20Accomplished-success.svg)]()
 
-A multivariable optimal climate control system engineered for greenhouse tomato (*Solanum lycopersicum*) production. Developed in **100% pure base MATLAB** without requiring the Control System Toolbox, Optimization Toolbox, or Simulink runtime engines.
+A multivariable optimal microclimate regulation and crop condition monitoring system engineered for greenhouse tomato (*Solanum lycopersicum*) cultivation. Developed in **100% pure base MATLAB** without requiring the Control System Toolbox, Optimization Toolbox, or Simulink runtime engines.
 
-The entire control, modeling, simulation, and real-time visualization pipeline executes from a single self-contained master file: **[`main.m`](main.m)**.
+The entire control, modeling, simulated sensor layer, and real-time visualization pipeline executes from a single self-contained master file: **[`main.m`](main.m)**.
 
 ---
 
 ## Table of Contents
-1. [Key Features](#key-features)
-2. [Online Scientific Data Sources](#online-scientific-data-sources)
-3. [System Modeling & State Space Formulation](#system-modeling--state-space-formulation)
-4. [Control Architectures](#control-architectures)
-5. [Botanical Growth Phases](#botanical-growth-phases)
-6. [Quantitative Benchmark Matrix](#quantitative-benchmark-matrix)
-7. [Visualizations & Real-Time Dashboards](#visualizations--real-time-dashboards)
-8. [Three-Phase Project Roadmap](#three-phase-project-roadmap)
-9. [How to Run](#how-to-run)
-10. [Repository Structure](#repository-structure)
+1. [Key Features & Hardware Architecture](#key-features--hardware-architecture)
+2. [Physical Sensor Suite Mapping (ESP32 Node)](#physical-sensor-suite-mapping-esp32-node)
+3. [Soil-Type Substrate Modeling](#soil-type-substrate-modeling)
+4. [Online Scientific Data Sources](#online-scientific-data-sources)
+5. [System Modeling & State Space Formulation](#system-modeling--state-space-formulation)
+6. [Control Architectures](#control-architectures)
+7. [Botanical Growth Phases](#botanical-growth-phases)
+8. [Quantitative Benchmark Matrix](#quantitative-benchmark-matrix)
+9. [Visualizations & Real-Time Dashboards](#visualizations--real-time-dashboards)
+10. [Three-Phase Project Roadmap](#three-phase-project-roadmap)
+11. [How to Run](#how-to-run)
+12. [Repository Structure](#repository-structure)
 
 ---
 
-## Key Features
+## Key Features & Hardware Architecture
 
-* **Single-File Master Architecture (`main.m`)**: All plant models, numerical linearization, modal analysis, controller syntheses, numerical simulation, and real-time plotting live inside one standalone file.
-* **Zero External Dependencies**: Pure native linear algebra implementation of Sylvester multi-input pole placement (`pure_place`), Continuous Algebraic Riccati Equation solver (`pure_care` via Real Ordered Schur decomposition), Kalman staircase decomposition (`pure_staircase`), and controllability/observability matrices (`pure_ctrb`, `pure_obsv`).
-* **Eraticated Historical Defects**:
-  - **Eliminated Matrix $B$ Halving Defect**: Forward differencing along the non-negative actuator manifold $[0, 1]$ prevents boundary clamping, restoring $100\%$ control gain ($B(1,1) = 12.00$).
-  - **Eliminated $10^7$ Gain Explosion**: Subspace coordinate scaling guarantees feedback gains strictly bounded within $[0.001, 1.0]$.
-  - **Zero Steady-State Tracking**: Augmented 15-state LQR with integral action (LQR-I) guarantees asymptotic rejection of diurnal thermal and solar disturbances.
-* **Real-Time Graphics**: Figures update with immediate `drawnow` flushes, displaying botanical growth phase demarcations and badges across all dashboards.
+* **Realistic Sensor-in-the-Loop Architecture**:
+  $$\text{Nonlinear Greenhouse Plant} \longrightarrow \text{Simulated Sensor Layer (Noise, Ranges, ADC)} \longrightarrow \text{Measured Outputs } y_{\text{meas}} \longrightarrow \text{Controllers}$$
+  Controllers operate on realistic noisy transducer readings rather than idealized mathematical states.
+* **Soil-Type Substrate Physics**: Directly models water retention, infiltration, and drainage kinetics for **Sandy**, **Loamy**, and **Clay** substrates.
+* **Physical State & Actuator Bounding**:
+  - True physical bounds enforced at each time step: $0 \le M \le 100\%$, $0 \le RH \le 100\%$, $0 \le W \le 100\%$.
+  - Explicit actuator saturation operator: $u_{\text{cmd}} \longrightarrow \text{sat}(u) \longrightarrow u_{\text{actual}} \in [0, 1]$.
+* **Water-Level Safety Interlock**: Automated emergency pump cutoff when water tank level drops below the minimum safety threshold ($W < 10\%$) to prevent pump cavitation and dry-run burnout.
+* **Dual Physical Observability Analysis**:
+  - Demonstrates why a 4-sensor microclimate node yields an observability rank of $4/11$ (nutrients and water unobservable from air data alone).
+  - Demonstrates how the dedicated 11-channel sensor suite achieves full state observability ($11/11$).
+* **Academically Correct Terminology**:
+  - **Decentralized Multi-Loop PID Control**: Correctly identified as decentralized single-input single-output control loops operating on the multivariable plant without a decoupling matrix.
+  - **Crop Condition Index (CCI)**: Evaluates physiological suitability without over-claiming camera-based visual fruit inspection (reserved for Phase 2/3 with ESP32-CAM).
+  - **Normalized 24-Hour Multi-Stage Benchmark**: Clarifies that 24 hours represents a compressed multi-stage controller stress test across all 5 botanical growth phases.
+
+---
+
+## Physical Sensor Suite Mapping (ESP32 Node)
+
+The simulated sensor layer directly maps each state variable to the actual hardware transducers selected for the Phase 2 ESP32 embedded prototype:
+
+| MATLAB State Variable | Target Physical Hardware Sensor | Operating Range | Simulated Noise ($\sigma$) | Sensor Interface |
+|---|---|---|---|---|
+| $x_1$: Soil Moisture (%) | Capacitive Soil Moisture Sensor v1.2 | $0 - 100\%$ | $0.50\%$ | Analog ADC |
+| $x_2$: Air Temperature (°C) | BME280 Environmental Sensor | $-40 - 85^\circ\text{C}$ | $0.20^\circ\text{C}$ | I2C |
+| $x_3$: Relative Humidity (%) | BME280 Environmental Sensor | $0 - 100\%$ | $0.80\%$ | I2C |
+| $x_4$: Total Illumination (lux) | BH1750 Ambient Light Sensor | $0 - 65,535\text{ lux}$ | $50.0\text{ lux}$ | I2C |
+| $x_5$: Soil pH | Analog pH Sensor Probe & Module | $0 - 14\text{ pH}$ | $0.05\text{ pH}$ | Analog ADC |
+| $x_6$: Soil EC (dS/m) | Industrial EC / TDS Sensor Module | $0 - 10\text{ dS/m}$ | $0.02\text{ dS/m}$ | Analog ADC |
+| $x_7$: Available Nitrogen ($N$) | RS485 Industrial NPK Soil Sensor | $0 - 1,999\text{ mg/kg}$ | $1.0\text{ mg/kg}$ | RS485 / Modbus |
+| $x_8$: Available Phosphorus ($P$)| RS485 Industrial NPK Soil Sensor | $0 - 1,999\text{ mg/kg}$ | $0.5\text{ mg/kg}$ | RS485 / Modbus |
+| $x_9$: Available Potassium ($K$) | RS485 Industrial NPK Soil Sensor | $0 - 1,999\text{ mg/kg}$ | $1.0\text{ mg/kg}$ | RS485 / Modbus |
+| $x_{10}$: Water Storage Level (%) | Non-Contact Hydrostatic / Float Sensor | $0 - 100\%$ | $0.50\%$ | Digital / Analog |
+| $x_{11}$: Gas / Air Quality | MQ-135 Hazardous Gas / VOC Sensor | $10 - 1,000\text{ ppm}$ | $1.00\text{ index}$ | Analog ADC |
+| *Visual Fruit Monitoring* | ESP32-CAM Video Stream | $1600 \times 1200\text{ px}$ | - | Wi-Fi / Future Ext. |
+
+---
+
+## Soil-Type Substrate Modeling
+
+Soil physics directly modulate moisture retention, drainage rate, and irrigation infiltration:
+
+$$\frac{dM}{dt} = \gamma_{\text{irr}} \cdot u_1 - k_{\text{evap}} \cdot d_3 \cdot \left(1 + 0.01\max(T - 25, 0)\right) - k_{\text{drain}} \cdot \max(M - M_{\text{thresh}}, 0)$$
+
+| Soil Substrate | Infiltration Gain ($\gamma_{\text{irr}}$) | Drainage Gain ($k_{\text{drain}}$) | Evaporative Loss Factor ($k_{\text{evap}}$) | Drainage Threshold ($M_{\text{thresh}}$) | Physical Characteristics |
+|---|---|---|---|---|---|
+| **Sandy Soil** | $14.0$ | $0.045$ (Fast) | $2.60$ (High) | $40.0\%$ | Low retention, rapid drainage, requires pulsed watering |
+| **Loamy Soil (Default)** | $12.0$ | $0.020$ (Balanced) | $2.00$ (Moderate) | $50.0\%$ | Balanced aeration, standard commercial greenhouse substrate |
+| **Clay Soil** | $9.5$ | $0.008$ (Slow) | $1.40$ (Low) | $65.0\%$ | High water-binding capacity, slow drainage, aeration risk |
 
 ---
 
 ## Online Scientific Data Sources
 
-All botanical target setpoints, physiological tolerance ranges, and agronomic health curves are derived directly from authoritative peer-reviewed agricultural standards:
+Botanical setpoints and physiological tolerance bands are sourced directly from official agricultural standards:
 
 1. **Food and Agriculture Organization (FAO)**:  
    *Crop Ecological Requirements and Irrigation Guidelines: Tomato (Solanum lycopersicum)*  
@@ -57,83 +103,46 @@ All botanical target setpoints, physiological tolerance ranges, and agronomic he
 
 ---
 
-## System Modeling & State Space Formulation
-
-The non-linear plant dynamics are governed by 11 coupled state variables, 4 bounded physical control inputs, and 3 continuous diurnal disturbances:
-
-$$\dot{x}(t) = f(x(t), u(t), d(t)), \quad u(t) \in [0, 1]^4$$
-
-### State Vector ($x \in \mathbb{R}^{11}$)
-* $x_1$: Soil Moisture (%)
-* $x_2$: Greenhouse Air Temperature (°C)
-* $x_3$: Greenhouse Relative Humidity (%)
-* $x_4$: Total Illumination / PAR (lux)
-* $x_5$: Soil pH
-* $x_6$: Soil Electrical Conductivity (EC, dS/m)
-* $x_7$: Available Nitrogen ($N$, mg/kg)
-* $x_8$: Available Phosphorus ($P$, mg/kg)
-* $x_9$: Available Potassium ($K$, mg/kg)
-* $x_{10}$: Water Storage Level (%)
-* $x_{11}$: VOC / Gaseous Stress Index (0–100)
-
-### Control Actuators ($u \in [0, 1]^4$)
-* $u_1$: Irrigation Drip Pump Duty Cycle
-* $u_2$: Ventilation Fan Cooling Duty Cycle
-* $u_3$: Ultrasonic Misting System Duty Cycle
-* $u_4$: Supplemental LED Grow Light Duty Cycle
-
-### Diurnal Weather Disturbances ($d \in \mathbb{R}^3$)
-* $d_1$: Ambient Outdoor Temperature ($18^\circ\text{C} - 29^\circ\text{C}$ diurnal cycle)
-* $d_2$: Natural Solar Irradiance ($0 - 22,000\text{ lux}$ solar bell curve)
-* $d_3$: Soil Evaporation Demand Index ($0.35 - 1.15$)
-
----
-
 ## Control Architectures
 
-The project contrasts three multivariable control strategies under identical diurnal disturbances:
-
-1. **Multiloop Decoupled PID**:
-   - 4 independent feedback loops governing soil moisture, air temperature, relative humidity, and illumination.
-   - Equipped with **conditional integration anti-windup clamping** that freezes integrator accumulation whenever actuators reach physical saturation limits ($0.0$ or $1.0$).
+1. **Decentralized Multi-Loop PID**:
+   - 4 independent single-input single-output control loops ($M \rightarrow \text{Pump}$, $T \rightarrow \text{Fan}$, $H \rightarrow \text{Mist}$, $L \rightarrow \text{Light}$).
+   - Includes **tracking anti-windup clamping** that freezes integrator accumulation whenever actuators reach saturation boundaries ($0.0$ or $1.0$).
 2. **Scaled Subspace Pole Placement**:
-   - Extracts the actively actuated environmental subsystem ($4 \times 4$).
-   - Multi-input Sylvester equation assigns well-damped, stable closed-loop eigenvalues:
-     $$\lambda_{\text{desired}} = \{-0.60, -0.80, -1.00, -1.20\}\text{ h}^{-1}$$
-   - Feedback gains remain strictly bounded ($|K_{ij}| \le 0.2167$), eliminating aggressive actuator chattering.
+   - Assigns stable closed-loop poles: $\lambda = \{-0.60, -0.80, -1.00, -1.20\}\text{ h}^{-1}$.
+   - Subspace scaling ensures feedback gains are bounded within $[0.001, 1.0]$, avoiding the $10^7$ gain explosion.
 3. **Optimal Linear Quadratic Regulator with Integral Action (LQR-I)**:
-   - Formulates an augmented 15-state system ($11$ plant states $+ 4$ tracking error integrators):
-     $$\dot{z}(t) = y_{\text{track}}(t) - r(t) = C_{\text{track}}x(t) - r(t)$$
+   - Formulates an augmented 15-state space ($11$ plant states $+ 4$ tracking error integrators).
    - Solves the Continuous Algebraic Riccati Equation (CARE) using Hamiltonian Real Ordered Schur decomposition (residual norm $= 1.25 \times 10^{-10}$).
-   - Guarantees zero steady-state tracking error across all 5 growth stage transitions.
+   - Guarantees zero steady-state tracking error across all 5 growth stages.
 
 ---
 
 ## Botanical Growth Phases
 
-The 24-hour simulation maps across all 5 botanical development stages of the tomato lifecycle:
+The normalized 24-hour benchmark compresses the 120-day tomato cultivation lifecycle into 5 evaluation intervals:
 
 | Phase | Time ($t$) | Equivalent Days | Optimal Temp (°C) | Optimal RH (%) | Optimal Moisture (%) | Optimal Light (lux) |
 |---|---|---|---|---|---|---|
-| **Stage 1: Germination** | $0 - 2$ h | Days $0 - 10$ | $24.0$ ($20 - 28$) | $72.5$ ($65 - 80$) | $70.0$ ($60 - 80$) | $10,000$ |
-| **Stage 2: Vegetative** | $2 - 8$ h | Days $10 - 40$ | $25.0$ ($21 - 27$) | $65.0$ ($55 - 75$) | $60.0$ ($50 - 70$) | $18,000$ |
-| **Stage 3: Flowering** | $8 - 12$ h | Days $40 - 60$ | $23.5$ ($20 - 26$) | $62.5$ ($50 - 70$) | $58.0$ ($50 - 65$) | $22,500$ |
-| **Stage 4: Fruit Dev.** | $12 - 18$ h | Days $60 - 90$ | $25.0$ ($21 - 28$) | $60.0$ ($50 - 70$) | $65.0$ ($55 - 75$) | $22,500$ |
-| **Stage 5: Maturity** | $18 - 24$ h | Days $90 - 120$ | $22.5$ ($18 - 26$) | $55.0$ ($45 - 65$) | $55.0$ ($45 - 65$) | $20,000$ |
+| **Phase 1: Germination** | $0 - 2$ h | Days $0 - 10$ | $24.0$ ($20 - 28$) | $72.5$ ($65 - 80$) | $70.0$ ($60 - 80$) | $10,000$ |
+| **Phase 2: Vegetative** | $2 - 8$ h | Days $10 - 40$ | $25.0$ ($21 - 27$) | $65.0$ ($55 - 75$) | $60.0$ ($50 - 70$) | $18,000$ |
+| **Phase 3: Flowering** | $8 - 12$ h | Days $40 - 60$ | $23.5$ ($20 - 26$) | $62.5$ ($50 - 70$) | $58.0$ ($50 - 65$) | $22,500$ |
+| **Phase 4: Fruit Dev.** | $12 - 18$ h | Days $60 - 90$ | $25.0$ ($21 - 28$) | $60.0$ ($50 - 70$) | $65.0$ ($55 - 75$) | $22,500$ |
+| **Phase 5: Maturity** | $18 - 24$ h | Days $90 - 120$ | $22.5$ ($18 - 26$) | $55.0$ ($45 - 65$) | $55.0$ ($45 - 65$) | $20,000$ |
 
 ---
 
 ## Quantitative Benchmark Matrix
 
-Performance indices evaluated from end-to-end 24-hour closed-loop simulations:
+Evaluated under identical diurnal weather disturbances and active simulated sensor noise:
 
-| Performance Metric | Multiloop PID | Pole Placement | Optimal LQR-I | Academic Assessment |
+| Performance Metric | Decentralized PID | Pole Placement | Optimal LQR-I | Academic Assessment |
 |---|---|---|---|---|
-| **Total ISE (Tracking Error)** | $1.48 \times 10^8$ | $8.05 \times 10^8$ | **$1.58 \times 10^7$** | **LQR-I achieves 89.3% reduction in error variance** |
-| **Total IAE** | $48,921.25$ | $118,523.58$ | **$5,748.36$** | **Optimal tracking with minimal deviation** |
-| **Total Actuator Variation (TV)** | $16.25$ | **$8.06$** | $15.57$ | **Smooth duty cycle commands without actuator chattering** |
-| **Mean Crop Health Quality** | $99.82\%$ | $98.38\%$ | **$99.96\%$** | **Near-perfect physiological health maintained** |
-| **Linear vs Nonlinear Discrepancy**| $< 10^{-9}\%$ | $< 10^{-9}\%$ | $< 10^{-9}\%$ | **Analytical and numerical Jacobians fully verified** |
+| **Total ISE (Tracking Error)** | $1.53 \times 10^8$ | $8.04 \times 10^8$ | **$1.57 \times 10^7$** | **LQR-I achieves 89.7% error variance reduction** |
+| **Total IAE** | $50,307.27$ | $118,518.36$ | **$5,854.26$** | **LQR-I maintains tightest physical tracking** |
+| **Total Actuator Variation (TV)** | $2,090.93$ | **$277.93$** | $728.28$ | **Modern control rejects sensor noise significantly better** |
+| **Mean Crop Condition Index (CCI)**| $99.76\%$ | $98.37\%$ | **$99.94\%$** | **Optimal physiological conditions maintained** |
+| **Linear vs Nonlinear Discrepancy**| $< 10^{-9}\%$ | $< 10^{-9}\%$ | $< 10^{-9}\%$ | **Jacobian linearization verified** |
 
 ---
 
@@ -144,11 +153,11 @@ All figures are automatically displayed in real time and exported to [`results/`
 ### 1. State Tracking Dashboard across Growth Phases
 ![State Tracking](results/comparison_state_tracking.png)
 
-### 2. Actuator Duty Cycles & Anti-Windup Saturation
+### 2. Actuator Duty Cycles & Safety Interlock Saturation
 ![Actuator Effort](results/comparison_actuator_effort.png)
 
-### 3. Hierarchical Crop Health Quality (Environmental, Soil, Nutrient, Composite)
-![Crop Quality](results/comparison_crop_quality.png)
+### 3. Hierarchical Crop Condition Index (CCI)
+![Crop Condition Index](results/comparison_crop_quality.png)
 
 ### 4. Complex S-Plane Modal Map (Open-Loop vs. PP vs. LQR-I)
 ![S-Plane Pole Map](results/s_plane_pole_map.png)
@@ -160,9 +169,9 @@ All figures are automatically displayed in real time and exported to [`results/`
 
 ## Three-Phase Project Roadmap
 
-* **Phase 1 (100% Accomplished)**: Mathematical modeling, equilibrium trim point, unbiased linearization, modal diagnostics, tri-hybrid controller synthesis, 24-hour diurnal simulations across 5 growth phases, and single-file master architecture.
-* **Phase 2 (Upcoming - Physical Hardware Prototyping)**: Embedded microcontroller deployment (ESP32/STM32), physical sensor interfacing (SHT31, capacitive moisture, BH1750, pH/EC probes), high-power MOSFET/relay actuator driver boards, and Hardware-in-the-Loop (HIL) telemetry.
-* **Phase 3 (Final Phase - Edge AI, Cloud IoT & Crop Trials)**: Extended Kalman Filter (EKF) observer for unmeasured vegetative biomass states, Non-linear Model Predictive Control (NMPC) for energy/water optimization, cloud dashboard (AWS IoT / ThingsBoard), and live biological tomato crop validation.
+* **Phase 1 (100% Accomplished)**: Mathematical plant modeling, equilibrium trim point, unbiased linearization, dual observability analysis, tri-hybrid controller synthesis, simulated sensor layer with noise, water-level safety interlock, soil physics, and single-file master architecture.
+* **Phase 2 (Upcoming - Physical Hardware Prototyping)**: Embedded microcontroller deployment (ESP32/STM32), physical sensor interfacing (BME280, capacitive moisture v1.2, BH1750, pH/EC probes, RS485 NPK), high-power MOSFET/relay actuator driver boards, and Hardware-in-the-Loop (HIL) telemetry.
+* **Phase 3 (Final Phase - Edge AI, Cloud IoT & Crop Trials)**: Extended Kalman Filter (EKF) observer, Non-linear Model Predictive Control (NMPC), cloud dashboard (AWS IoT / ThingsBoard), and live biological tomato crop validation trial.
 
 For the full milestone schedule and Gantt timeline, see **[`MID_SEM_PLAN.md`](MID_SEM_PLAN.md)**.  
 For algorithmic step-by-step logic, see **[`PSEUDOCODE.md`](PSEUDOCODE.md)**.
