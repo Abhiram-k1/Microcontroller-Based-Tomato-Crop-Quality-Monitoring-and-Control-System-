@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Phase 3 — Modal Analysis, Dual Observability & Tri-Hybrid Control Synthesis</title>
+<style>
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    width: 16in;
+    height: 9in;
+    margin: 0;
+    padding: 10px 14px;
+    background-color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .header-banner {
+    background: linear-gradient(135deg, #091e3a 0%, #0f3b75 60%, #1e40af 100%);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 6px solid #38bdf8;
+  }
+  .header-left h1 {
+    font-size: 15pt;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .header-left .subtitle {
+    font-size: 8.5pt;
+    color: #93c5fd;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .header-badges {
+    display: flex;
+    gap: 8px;
+  }
+  .badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 7.2pt;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  /* Grid Layout */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 2.5fr 2.5fr 2.5fr 2.5fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 9px;
+    flex: 1;
+    margin: 8px 0;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1.5px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .card-header {
+    padding: 4px 8px;
+    font-size: 7.8pt;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-body {
+    padding: 6px 8px;
+    flex: 1;
+    font-size: 6.8pt;
+    line-height: 1.35;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .bg-blue   { background: #0369a1; border-color: #0369a1; }
+  .bg-emerald{ background: #047857; border-color: #047857; }
+  .bg-amber  { background: #b45309; border-color: #b45309; }
+  .bg-purple { background: #6d28d9; border-color: #6d28d9; }
+  .bg-indigo { background: #4338ca; border-color: #4338ca; }
+  .bg-teal   { background: #0f766e; border-color: #0f766e; }
+  .bg-crimson{ background: #b91c1c; border-color: #b91c1c; }
+
+  .math-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #0284c7;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-family: "Cambria Math", "Times New Roman", serif;
+    font-size: 7.4pt;
+    margin: 2px 0;
+  }
+  .math-box.amber { border-left-color: #d97706; }
+  .math-box.green { border-left-color: #059669; }
+  .math-box.purple{ border-left-color: #7c3aed; }
+  .math-box.red   { border-left-color: #dc2626; }
+
+  .callout-box {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 6.5pt;
+    color: #92400e;
+    margin-top: 3px;
+  }
+  .callout-box.info {
+    background: #e0f2fe;
+    border-color: #bae6fd;
+    color: #0369a1;
+  }
+  .callout-box.alert {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+  }
+
+  table.compact-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 6.4pt;
+    margin: 2px 0;
+  }
+  table.compact-tbl th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    padding: 2px 4px;
+    border: 1px solid #cbd5e1;
+  }
+  table.compact-tbl td {
+    padding: 2px 4px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .bottom-flow {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .flow-step {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-align: center;
+    flex: 1;
+    margin: 0 3px;
+  }
+  .flow-step .step-title { font-size: 7.2pt; font-weight: 700; }
+  .flow-step .step-sub { font-size: 5.8pt; color: #475569; }
+</style>
+</head>
+<body>
+
+  <!-- HEADER BANNER -->
+  <div class="header-banner">
+    <div class="header-left">
+      <h1>PHASE 3 &bull; MODAL ANALYSIS, DUAL OBSERVABILITY & TRI-HYBRID CONTROL</h1>
+      <div class="subtitle">Linear State Space &rarr; Modal Controllability &rarr; Dual Observability (4 vs 11 Transducers) &rarr; Tri-Hybrid Synthesis &rarr; Sensor-in-the-Loop Benchmark</div>
+    </div>
+    <div class="header-badges">
+      <div class="badge">Sylvester Subspace Solver</div>
+      <div class="badge">Real Ordered Schur CARE</div>
+      <div class="badge">Tracking Anti-Windup Clamping</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- BOX 1: INPUT FROM PHASE 2 & MODAL SPECTRUM -->
+    <div class="card" style="border-color: #0369a1;">
+      <div class="card-header bg-blue">
+        <span>1. INPUT FROM PHASE 2 & MODAL MAP</span>
+        <span>A &in; R<sup>11&times;11</sup>, B &in; R<sup>11&times;4</sup></span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Continuous-Time Plant State-Space:</b>
+          <div class="math-box">
+            &delta;dx/dt = A &delta;x + B &delta;u + B<sub>d</sub> &delta;d, &nbsp; y = C &delta;x
+          </div>
+          <b>B. Open-Loop Eigenvalues & Time Constants:</b>
+          <div class="math-box">
+            &lambda;<sub>M</sub> = &minus;0.020 h<sup>&minus;1</sup> (&tau; &approx; 50h &bull; Substrate drainage)<br>
+            &lambda;<sub>T</sub> = &minus;0.150 h<sup>&minus;1</sup> (&tau; &approx; 6.7h &bull; Greenhouse thermal)<br>
+            &lambda;<sub>L</sub> = &minus;0.500 h<sup>&minus;1</sup> (&tau; &approx; 2.0h &bull; Illumination)<br>
+            &lambda;<sub>H</sub> = 0.000 h<sup>&minus;1</sup> (Integrator mode &bull; Fan/Mist balance)
+          </div>
+        </div>
+        <div class="callout-box info">
+          <b>System Stability:</b> Marginally stable due to one integrator mode (&lambda;<sub>H</sub>=0). All 10 remaining modes are strictly in the open left-half s-plane.
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX 2: CONTROLLABILITY & KALMAN STAIRCASE -->
+    <div class="card" style="border-color: #0f766e;">
+      <div class="card-header bg-teal">
+        <span>2. CONTROLLABILITY PROOF</span>
+        <span>Kalman Staircase Form</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Kalman Controllability Matrix:</b>
+          <div class="math-box">
+            <b>Co</b> = [B, AB, A<sup>2</sup>B, ..., A<sup>10</sup>B] &in; R<sup>11 &times; 44</sup><br>
+            <b>rank(Co) = 4 of 11</b>
+          </div>
+          <b>B. Controllability Decomposition Proof:</b>
+          <div class="math-box">
+            T<sup>T</sup> A T = [A<sub>cc</sub> (4&times;4), A<sub>12</sub>; 0, A<sub>uu</sub> (7&times;7)]<br>
+            T<sup>T</sup> B = [B<sub>cc</sub> (4&times;4); 0 (7&times;4)]
+          </div>
+        </div>
+        <div class="callout-box info">
+          <b>Stabilizability Guarantee:</b> Uncontrollable substrate modes (NPK, pH, EC, tank) have negative real parts (&lambda; &le; &minus;0.02) &bull; The system is strictly <b>stabilizable</b>.
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX 3: DUAL OBSERVABILITY ANALYSIS -->
+    <div class="card" style="border-color: #b45309;">
+      <div class="card-header bg-amber">
+        <span>3. DUAL OBSERVABILITY PROOF</span>
+        <span>Case A vs Case B Sensor Suite</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>Case A: 4 Primary Microclimate Sensors</b>
+          <div class="math-box amber">
+            C<sub>prim</sub> = [I<sub>4&times;4</sub>, 0<sub>4&times;7</sub>] &rArr; <b>rank(Ob) = 4 / 11</b><br>
+            <i>Proof:</i> Unobservable subspace has dimension 7. Soil nutrients (N, P, K), pH, EC, and water level cannot be detected from air data!
+          </div>
+
+          <b>Case B: Dedicated 11-Transducer Suite</b>
+          <div class="math-box amber">
+            C<sub>full</sub> = I<sub>11&times;11</sub> &rArr; <b>rank(Ob) = 11 / 11</b> (Full Rank!)<br>
+            <i>Proof:</i> All 11 internal biological and reservoir states are 100% reconstructible.
+          </div>
+        </div>
+        <div class="callout-box alert">
+          <b>Viva Core Concept:</b> Mathematically proves why low-cost greenhouses fail when omitting root-zone and nutrient transducers!
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX 4: DECENTRALIZED PID + ANTI-WINDUP -->
+    <div class="card" style="border-color: #047857;">
+      <div class="card-header bg-emerald">
+        <span>4. DECENTRALIZED MULTI-LOOP PID</span>
+        <span>Tracking Anti-Windup Clamping</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. 4 Single-Input Single-Output Loops:</b>
+          <div class="math-box green">
+            Loop 1: Moisture (y<sub>1</sub>) &rarr; Irrigation Pump (u<sub>1</sub>)<br>
+            Loop 2: Temperature (y<sub>2</sub>) &rarr; Ventilation Fan (u<sub>2</sub>)<br>
+            Loop 3: Humidity (y<sub>3</sub>) &rarr; Ultrasonic Misting (u<sub>3</sub>)<br>
+            Loop 4: Illumination (y<sub>4</sub>) &rarr; Supplemental Light (u<sub>4</sub>)
+          </div>
+          <b>B. Tracking Anti-Windup Clamping Logic:</b>
+          <div class="math-box green">
+            <b>IF</b> (u<sub>raw</sub> &ge; 1.0 &and; e &gt; 0) &or; (u<sub>raw</sub> &le; 0.0 &and; e &lt; 0) <b>THEN</b><br>
+            &nbsp;&nbsp; &int;e(k+1) = &int;e(k) &nbsp; <i>(Freeze integrator accumulation)</i><br>
+            <b>ELSE</b> &int;e(k+1) = &int;e(k) + e(k)&middot;dt
+          </div>
+        </div>
+        <div class="callout-box info">
+          Prevents massive actuator overshoots and long recovery delays caused by physical actuator saturation boundaries!
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX 5: SCALED SUBSPACE POLE PLACEMENT -->
+    <div class="card" style="border-color: #6d28d9;">
+      <div class="card-header bg-purple">
+        <span>5. SCALED SUBSPACE POLE PLACEMENT</span>
+        <span>Sylvester Subspace Projection</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Target Closed-Loop Pole Locations:</b>
+          <div class="math-box purple">
+            &lambda;<sub>des</sub> = {-0.60, -0.80, -1.00, -1.20} h<sup>&minus;1</sup><br>
+            Settling times: 1.0 &ndash; 2.0 hours (Safe physical actuation).
+          </div>
+          <b>B. Sylvester Equation Subspace Solver:</b>
+          <div class="math-box purple">
+            (A<sub>env</sub> &minus; &lambda;<sub>j</sub> I) x<sub>j</sub> = B<sub>env</sub> g<sub>j</sub> &rArr; K<sub>env</sub> = G X<sup>&minus;1</sup><br>
+            Iterative optimization selects G to minimize cond(X).
+          </div>
+        </div>
+        <div class="callout-box" style="background:#f5f3ff; border-color:#ddd6fe; color:#5b21b6;">
+          <b>Gain Explosion Elimination:</b> Classical pole placement yields gains &gt; 10<sup>7</sup>. Subspace scaling bounds max gain to <b>|K<sub>ij</sub>| &le; 0.2167</b> (&lt; 1.0).
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX 6: OPTIMAL LQR-I VIA REAL SCHUR CARE -->
+    <div class="card" style="border-color: #4338ca;">
+      <div class="card-header bg-indigo">
+        <span>6. OPTIMAL LQR WITH INTEGRAL ACTION</span>
+        <span>Hamiltonian Real Ordered Schur CARE</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Augmented 15-State System:</b>
+          <div class="math-box">
+            x<sub>a</sub> = [x; z] &in; R<sup>15</sup>, &nbsp; dz/dt = y<sub>meas</sub>(1:4) &minus; r<sub>sp</sub><br>
+            A<sub>a</sub> = [A, 0; C<sub>track</sub>, 0], &nbsp; B<sub>a</sub> = [B; 0]
+          </div>
+          <b>B. Symplectic Real Ordered Schur CARE Solver:</b>
+          <div class="math-box">
+            H = [A<sub>a</sub>, &minus;B<sub>a</sub>R<sup>&minus;1</sup>B<sub>a</sub><sup>T</sup>; &minus;Q<sub>a</sub>, &minus;A<sub>a</sub><sup>T</sup>] &in; R<sup>30&times;30</sup><br>
+            [U, T] = schur(H, 'real'); ordschur(U, T, 'lhp')<br>
+            P = Re(V<sub>2</sub> V<sub>1</sub><sup>&minus;1</sup>) &rArr; <b>K<sub>a</sub> = R<sup>&minus;1</sup> B<sub>a</sub><sup>T</sup> P = [K<sub>x</sub>, K<sub>i</sub>]</b>
+          </div>
+        </div>
+        <div class="callout-box info">
+          <b>Algebraic Precision:</b> CARE residual norm = <b>1.25 &times; 10<sup>&minus;10</sup></b>. Guarantees asymptotic zero steady-state error & 89.7% error variance reduction!
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX 7: SENSOR LAYER & SAFETY INTERLOCK -->
+    <div class="card" style="border-color: #b91c1c;">
+      <div class="card-header bg-crimson">
+        <span>7. TRANSDUCER LAYER & SAFETY INTERLOCK</span>
+        <span>ESP32 Hardware Simulation</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Physical Sensor Transduction & Noise:</b>
+          <div class="math-box red">
+            y<sub>meas, i</sub> = clamp(x<sub>i</sub> + v<sub>i</sub>, min<sub>i</sub>, max<sub>i</sub>), &nbsp; v<sub>i</sub> ~ N(0, &sigma;<sub>i</sub><sup>2</sup>)<br>
+            Enforces 12-bit ADC quantization and sensor clipping ranges.
+          </div>
+          <b>B. Emergency Water Safety Cutoff Interlock:</b>
+          <div class="math-box red">
+            <b>IF x<sub>10</sub> &lt; 10.0% THEN u<sub>actual</sub>(1) = 0.0 (Pump Cutoff)</b>
+          </div>
+          <b>C. Natural Thermodynamic State Bounding:</b>
+          <div class="math-box red">
+            0 &le; M &le; 100%, &nbsp; 0 &le; RH &le; 100%, &nbsp; 0 &le; W &le; 100%, &nbsp; L &ge; 0
+          </div>
+        </div>
+        <div class="callout-box alert">
+          <b>Hardware Protection:</b> Eliminates pump cavitation, seal destruction, and unrealistic negative water/humidity numerical artifacts.
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX 8: BENCHMARK SCORECARD & CROP QUALITY -->
+    <div class="card" style="border-color: #047857;">
+      <div class="card-header bg-emerald">
+        <span>8. PERFORMANCE SCORECARD & SUMMARY</span>
+        <span>Quantitative Controller Comparison</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <table class="compact-tbl">
+            <tr><th>Metric</th><th>Decentralized PID</th><th>Pole Placement</th><th>Optimal LQR-I</th></tr>
+            <tr><td><b>Total ISE</b></td><td>1.53 &times; 10<sup>8</sup></td><td>8.04 &times; 10<sup>8</sup></td><td><b>1.57 &times; 10<sup>7</sup> (&minus;89.7%)</b></td></tr>
+            <tr><td><b>Total IAE</b></td><td>50,307.27</td><td>118,518.36</td><td><b>5,854.26</b></td></tr>
+            <tr><td><b>Total Variation (TV)</b></td><td>2,090.93</td><td><b>277.93</b></td><td>728.28</td></tr>
+            <tr><td><b>Mean Crop Score (CCI)</b></td><td>99.76%</td><td>98.37%</td><td><b>99.94%</b></td></tr>
+            <tr><td><b>Max Feedback Gain</b></td><td>0.2000</td><td>0.2167</td><td>1.6540</td></tr>
+          </table>
+        </div>
+        <div class="callout-box info" style="background:#ecfdf5; border-color:#a7f3d0; color:#065f46;">
+          <b>Comprehensive Synthesis:</b><br>
+          &bull; <b>LQR-I</b> delivers the tightest multivariable tracking & noise rejection.<br>
+          &bull; <b>Pole Placement</b> minimizes actuator chattering (TV=277.93).<br>
+          &bull; <b>Decentralized PID</b> is simplest but suffers from cross-coupling chattering.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM FLOW BANNER -->
+  <div class="bottom-flow">
+    <div class="flow-step">
+      <div class="step-title">1. Linear Plant</div>
+      <div class="step-sub">A (11x11), B (11x4)</div>
+    </div>
+    <div style="font-weight:bold; color:#94a3b8;">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">2. Controllability</div>
+      <div class="step-sub">rank(Co) = 4/11</div>
+    </div>
+    <div style="font-weight:bold; color:#94a3b8;">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">3. Observability</div>
+      <div class="step-sub">4/11 vs 11/11 Dedicated</div>
+    </div>
+    <div style="font-weight:bold; color:#94a3b8;">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">4. Controller Design</div>
+      <div class="step-sub">PID / PP / LQR-I CARE</div>
+    </div>
+    <div style="font-weight:bold; color:#94a3b8;">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">5. Sensor & Safety</div>
+      <div class="step-sub">Transducer Noise & Cutoff</div>
+    </div>
+    <div style="font-weight:bold; color:#94a3b8;">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">6. 24h Diurnal Sim</div>
+      <div class="step-sub">5 Growth Stages</div>
+    </div>
+    <div style="font-weight:bold; color:#94a3b8;">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">7. Crop Scorecard</div>
+      <div class="step-sub">CCI 99.94% (LQR-I)</div>
+    </div>
+  </div>
+
+</body>
+</html>

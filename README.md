@@ -165,6 +165,12 @@ All figures are automatically displayed in real time and exported to [`results/`
 ### 5. Quantitative Performance Scorecard Bar Charts
 ![Performance Scorecard](results/performance_scorecard.png)
 
+### 6. End-to-End Master Methodology Chart (16:9 Widescreen Presentation Board)
+![Master Methodology](results/master_methodology_chart.png)
+
+### 7. Phase 3 Modal Analysis & Tri-Hybrid Control Methodology (16:9 Widescreen Presentation Board)
+![Phase 3 Methodology](results/phase3_control_methodology_chart.png)
+
 ---
 
 ## Three-Phase Project Roadmap
@@ -202,6 +208,8 @@ Control_System_Project/
 ├── README.md                   # Comprehensive project documentation (this file)
 ├── .gitignore                  # Git ignore rules for MATLAB temp files
 └── results/                    # Auto-generated simulation outputs
+    ├── master_methodology_chart.png
+    ├── phase3_control_methodology_chart.png
     ├── comparison_state_tracking.png
     ├── comparison_actuator_effort.png
     ├── comparison_crop_quality.png
@@ -209,3 +217,4 @@ Control_System_Project/
     ├── performance_scorecard.png
     └── master_simulation_results.mat
 ```
+

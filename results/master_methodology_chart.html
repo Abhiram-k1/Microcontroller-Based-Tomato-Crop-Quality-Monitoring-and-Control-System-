@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Master Methodology — 11-State Tomato Greenhouse System</title>
+<style>
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    width: 16in;
+    height: 9in;
+    margin: 0;
+    padding: 10px 14px;
+    background-color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  /* Header Banner */
+  .header-banner {
+    background: linear-gradient(135deg, #091e3a 0%, #0f3b75 60%, #1e40af 100%);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 6px solid #38bdf8;
+  }
+  .header-left h1 {
+    font-size: 15pt;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-left .subtitle {
+    font-size: 8.5pt;
+    color: #93c5fd;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .header-badges {
+    display: flex;
+    gap: 8px;
+  }
+  .badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 7.2pt;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+  .badge.highlight {
+    background: #0284c7;
+    border-color: #38bdf8;
+    color: #ffffff;
+  }
+
+  /* Main Grid Layout */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 2.3fr 2.7fr 2.5fr 2.5fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 9px;
+    flex: 1;
+    margin: 8px 0;
+  }
+
+  /* Card Styles */
+  .card {
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1.5px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .card-header {
+    padding: 4px 8px;
+    font-size: 7.8pt;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-body {
+    padding: 6px 8px;
+    flex: 1;
+    font-size: 6.8pt;
+    line-height: 1.35;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Header Color Variations */
+  .bg-blue   { background: #0369a1; border-color: #0369a1; }
+  .bg-navy   { background: #0f3b75; border-color: #0f3b75; }
+  .bg-emerald{ background: #047857; border-color: #047857; }
+  .bg-amber  { background: #b45309; border-color: #b45309; }
+  .bg-purple { background: #6d28d9; border-color: #6d28d9; }
+  .bg-indigo { background: #4338ca; border-color: #4338ca; }
+  .bg-teal   { background: #0f766e; border-color: #0f766e; }
+  .bg-crimson{ background: #b91c1c; border-color: #b91c1c; }
+
+  /* Math & Code Blocks */
+  .math-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #0284c7;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-family: "Cambria Math", "Times New Roman", serif;
+    font-size: 7.4pt;
+    margin: 2px 0;
+  }
+  .math-box.amber { border-left-color: #d97706; }
+  .math-box.green { border-left-color: #059669; }
+  .math-box.purple{ border-left-color: #7c3aed; }
+  .math-box.red   { border-left-color: #dc2626; }
+
+  .eq {
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .formula-highlight {
+    background: #eff6ff;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-weight: 700;
+    color: #1e40af;
+  }
+
+  /* Callout Badges inside cards */
+  .callout-box {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 6.5pt;
+    color: #92400e;
+    margin-top: 3px;
+  }
+  .callout-box.info {
+    background: #e0f2fe;
+    border-color: #bae6fd;
+    color: #0369a1;
+  }
+  .callout-box.alert {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+  }
+
+  /* Compact Tables */
+  table.compact-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 6.4pt;
+    margin: 2px 0;
+  }
+  table.compact-tbl th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    padding: 2px 4px;
+    border: 1px solid #cbd5e1;
+    text-align: left;
+  }
+  table.compact-tbl td {
+    padding: 2px 4px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Bottom Takeaway Flow */
+  .bottom-flow {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .flow-step {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-align: center;
+    flex: 1;
+    margin: 0 3px;
+  }
+  .flow-step.active {
+    background: #eff6ff;
+    border-color: #3b82f6;
+  }
+  .flow-step .step-num {
+    font-size: 6pt;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+  }
+  .flow-step .step-title {
+    font-size: 7.2pt;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .flow-step .step-sub {
+    font-size: 5.8pt;
+    color: #475569;
+  }
+  .flow-arrow {
+    font-size: 10pt;
+    color: #94a3b8;
+    font-weight: bold;
+  }
+
+  .stat-pill {
+    display: inline-block;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 6.2pt;
+  }
+  .stat-pill.green { background: #dcfce7; color: #166534; }
+  .stat-pill.blue  { background: #dbeafe; color: #1e40af; }
+  .stat-pill.amber { background: #fef3c7; color: #92400e; }
+  .stat-pill.red   { background: #fee2e2; color: #991b1b; }
+</style>
+</head>
+<body>
+
+  <!-- HEADER BANNER -->
+  <div class="header-banner">
+    <div class="header-left">
+      <h1>MASTER METHODOLOGY &bull; 11-STATE TOMATO GREENHOUSE CONTROL SYSTEM</h1>
+      <div class="subtitle">Complete Scientific Pipeline: Physical Modeling &rarr; Soil Substrate Physics &rarr; Complete Equilibrium Trim &rarr; Unbiased Linearization &rarr; Dual Observability &rarr; Tri-Hybrid Control &rarr; Closed-Loop Diurnal Benchmark</div>
+    </div>
+    <div class="header-badges">
+      <div class="badge">Tomato: <i>Solanum lycopersicum</i></div>
+      <div class="badge">100% Pure Base MATLAB</div>
+      <div class="badge highlight">Zero Toolbox Dependencies</div>
+      <div class="badge">Single-File: <code>main.m</code></div>
+    </div>
+  </div>
+
+  <!-- MAIN METHODOLOGY GRID (4 columns x 2 rows) -->
+  <div class="main-grid">
+
+    <!-- COL 1, ROW 1: MODULE 1: SYSTEM DEFINITION & SENSOR SUITE -->
+    <div class="card" style="border-color: #0369a1;">
+      <div class="card-header bg-blue">
+        <span>1. SYSTEM INPUTS & HARDWARE SENSORS</span>
+        <span>R<sup>11</sup> &times; R<sup>4</sup> &times; R<sup>3</sup></span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. 11 Plant State Variables (x &in; R<sup>11</sup>):</b>
+          <div class="math-box">
+            <b>x</b> = [M, T, RH, L, pH, EC, N, P, K, W, VOC]<sup>T</sup>
+          </div>
+          <div style="font-size:6.3pt; color:#475569; margin-bottom:3px;">
+            M (Moisture %), T (Air Temp &deg;C), RH (Humidity %), L (Light lux), pH (0-14), EC (dS/m), N-P-K (mg/kg), W (Water tank %), VOC (Air Index).
+          </div>
+
+          <b>B. 4 Control Actuators (u &in; [0, 1]<sup>4</sup>):</b>
+          <div style="font-size:6.3pt; color:#1e293b;">
+            &bull; u<sub>1</sub>: Irrigation Pump &nbsp;|&nbsp; &bull; u<sub>2</sub>: Ventilation Fan<br>
+            &bull; u<sub>3</sub>: Ultrasonic Mist &nbsp;|&nbsp; &bull; u<sub>4</sub>: Supplemental Grow Light
+          </div>
+
+          <b style="margin-top:3px; display:block;">C. 3 Diurnal Disturbances (d &in; R<sup>3</sup>):</b>
+          <div style="font-size:6.3pt; color:#1e293b;">
+            &bull; d<sub>1</sub>: External Temp T<sub>ext</sub> &nbsp;|&nbsp; &bull; d<sub>2</sub>: Solar Light L<sub>nat</sub> &nbsp;|&nbsp; &bull; d<sub>3</sub>: Evap E<sub>vap</sub>
+          </div>
+        </div>
+
+        <div class="callout-box info">
+          <b>ESP32 Physical Transducer Layer:</b><br>
+          BME280 (T/RH via I2C), Capacitive v1.2 (M), BH1750 (L), Analog pH/EC probes, RS485 NPK, Float switch. Injected with realistic Gaussian noise <i>v ~ N(0, &sigma;<sup>2</sup>)</i>.
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2, ROW 1: MODULE 2: NONLINEAR MODEL & SOIL PHYSICS -->
+    <div class="card" style="border-color: #b45309;">
+      <div class="card-header bg-amber">
+        <span>2. NONLINEAR PLANT DYNAMICS & SOIL PHYSICS</span>
+        <span>Tomato_Dynamics</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>Coupled System ODEs: dx/dt = f(x, u, d)</b>
+          <div class="math-box amber">
+            <b>dM/dt</b> = &gamma;<sub>irr</sub>&middot;u<sub>1</sub> &minus; k<sub>evap</sub>&middot;E&middot;[1 + 0.01 max(T&minus;25, 0)] &minus; k<sub>drain</sub> max(M &minus; M<sub>th</sub>, 0)<br>
+            <b>dT/dt</b> = 0.15(T<sub>ext</sub> &minus; T) + 0.00008 L &minus; 3.0 u<sub>2</sub><br>
+            <b>dRH/dt</b> = 8.0 u<sub>3</sub> &minus; 4.0 u<sub>2</sub> &minus; 0.15 max(T &minus; 25, 0)<br>
+            <b>dL/dt</b> = 0.5(L<sub>nat</sub> &minus; L) + 30,000 u<sub>4</sub>
+          </div>
+
+          <b style="display:block; margin-top:2px;">Transpiration & Fertigation-Leaching Kinetics:</b>
+          <div class="math-box amber">
+            &tau; = [0.50 + 0.50(L/25000)] &times; [1 + 0.02 max(T&minus;22, 0)]<br>
+            <b>dN/dt</b> = 22 u<sub>1</sub> &minus; 3.8&tau; &minus; 0.05 L<sub>fac</sub> D (N/100) + 0.03(130 &minus; N)<br>
+            <b>dW/dt</b> = [0.05(80 &minus; W) + q<sub>refill</sub>] &minus; (0.5 E + 0.2 u<sub>1</sub>)
+          </div>
+        </div>
+
+        <table class="compact-tbl">
+          <tr><th>Soil Substrate</th><th>Drainage (k<sub>drain</sub>)</th><th>Infiltration (&gamma;)</th><th>Agronomic Behavior</th></tr>
+          <tr><td><b>Sandy</b></td><td>0.045 (Fast)</td><td>14.0 (High)</td><td>Rapid leaching; requires pulsed fertigation</td></tr>
+          <tr><td><b>Loamy (Default)</b></td><td>0.020 (Balanced)</td><td>12.0 (Med)</td><td>Optimal moisture retention & aeration</td></tr>
+          <tr><td><b>Clay</b></td><td>0.008 (Slow)</td><td>9.5 (Low)</td><td>High water binding; aeration hypoxia risk</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 3, ROW 1: MODULE 3: COMPLETE OPERATING POINT & TRIM -->
+    <div class="card" style="border-color: #047857;">
+      <div class="card-header bg-emerald">
+        <span>3. COMPLETE 11-STATE EQUILIBRIUM TRIM</span>
+        <span>Exact Stationary Operating Point</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Selected Nominal Environmental Targets:</b>
+          <div class="math-box green">
+            M<sup>*</sup> = 60%, &nbsp; T<sup>*</sup> = 25 &deg;C, &nbsp; RH<sup>*</sup> = 65%, &nbsp; L<sup>*</sup> = 15,000 lux
+          </div>
+
+          <b>B. Stationary Actuator Equilibrium Inversion:</b>
+          <div class="math-box green">
+            u<sub>1</sub><sup>*</sup> = [E<sub>loss</sub> + k<sub>drain</sub>(M<sup>*</sup>&minus;M<sub>th</sub>)] / &gamma;<sub>irr</sub> = <b>15.0%</b> (Pump)<br>
+            u<sub>2</sub><sup>*</sup> = [0.15(T<sub>ext</sub>&minus;T<sup>*</sup>) + 0.00008 L<sup>*</sup>] / 3.0 = <b>40.0%</b> (Fan)<br>
+            u<sub>3</sub><sup>*</sup> = [4.0 u<sub>2</sub><sup>*</sup> &minus; (&minus;0.15 max(T<sup>*</sup>&minus;25,0))] / 8.0 = <b>20.0%</b> (Mist)<br>
+            u<sub>4</sub><sup>*</sup> = max(0, L<sup>*</sup> &minus; L<sub>nat</sub>) / 30,000 = <b>0.0%</b> (Light)
+          </div>
+
+          <b>C. Consistent Substrate Equilibrium (States 5&ndash;11):</b>
+          <div style="font-size:6.3pt; color:#334155;">
+            N<sup>*</sup>=132.8 mg/kg, P<sup>*</sup>=48.2 mg/kg, K<sup>*</sup>=189.5 mg/kg, pH<sup>*</sup>=6.37, EC<sup>*</sup>=2.41 dS/m, W<sup>*</sup>=80%, VOC<sup>*</sup>=100.
+          </div>
+        </div>
+
+        <div class="callout-box alert">
+          <b>VERIFICATION GATE: ||dx<sub>0</sub>/dt||<sub>&infin;</sub> = 1.25 &times; 10<sup>&minus;10</sup> &approx; 0</b><br>
+          Guarantees exact mathematical stationary equilibrium across all 11 states simultaneously before linearization!
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 4, ROW 1: MODULE 4: LINEARIZATION & STEP VALIDATION -->
+    <div class="card" style="border-color: #6d28d9;">
+      <div class="card-header bg-purple">
+        <span>4. UNBIASED LINEARIZATION & STEP PROOF</span>
+        <span>A &in; R<sup>11&times;11</sup>, B &in; R<sup>11&times;4</sup></span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Unbiased Numerical Jacobian Differencing:</b>
+          <div class="math-box purple">
+            A(:, i) = [f(x<sub>0</sub> + h e<sub>i</sub>, u<sub>0</sub>, d<sub>0</sub>) &minus; f(x<sub>0</sub> &minus; h e<sub>i</sub>, u<sub>0</sub>, d<sub>0</sub>)] / (2h)<br>
+            B(:, j) = [f(x<sub>0</sub>, u<sub>0</sub> + h e<sub>j</sub>, d<sub>0</sub>) &minus; f(x<sub>0</sub>, u<sub>0</sub>, d<sub>0</sub>)] / h &nbsp; (h = 10<sup>&minus;6</sup>)
+          </div>
+          <div style="font-size:6.3pt; color:#475569;">
+            Linear state perturbation: &delta;dx/dt = A &delta;x + B &delta;u.
+          </div>
+
+          <b style="display:block; margin-top:2px;">B. Open-Loop Eigenvalues & Modal Spectrum:</b>
+          <div class="math-box purple">
+            &lambda;<sub>M</sub> = &minus;0.020 h<sup>&minus;1</sup>, &lambda;<sub>T</sub> = &minus;0.150 h<sup>&minus;1</sup>, &lambda;<sub>L</sub> = &minus;0.500 h<sup>&minus;1</sup><br>
+            &lambda;<sub>H</sub> = 0.000 h<sup>&minus;1</sup> (Integrator mode) &bull; Substrate modes &le; &minus;0.02 h<sup>&minus;1</sup>
+          </div>
+        </div>
+
+        <div class="callout-box" style="background:#f5f3ff; border-color:#ddd6fe; color:#5b21b6;">
+          <b>Step Perturbation Dynamic Consistency Proof:</b><br>
+          Step &delta;u<sub>1</sub> = +10% pump for 4h: Linear deviation &delta;M<sub>L</sub> = +3.398%, Nonlinear deviation &delta;M<sub>NL</sub> = +3.398%. Discrepancy: <b>||&delta;x<sub>NL</sub> &minus; &delta;x<sub>L</sub>||<sub>&infin;</sub> &lt; 10<sup>&minus;9</sup>%</b>.
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 1, ROW 2: MODULE 5: CONTROLLABILITY & DUAL OBSERVABILITY -->
+    <div class="card" style="border-color: #0f766e;">
+      <div class="card-header bg-teal">
+        <span>5. CONTROLLABILITY & DUAL OBSERVABILITY</span>
+        <span>Kalman Algebraic Proofs</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Controllability Matrix & Kalman Staircase:</b>
+          <div class="math-box">
+            <b>Co</b> = [B, AB, A<sup>2</sup>B, ..., A<sup>10</sup>B] &in; R<sup>11 &times; 44</sup> &rArr; <b>rank(Co) = 4 / 11</b>
+          </div>
+          <div style="font-size:6.2pt; color:#334155;">
+            <b>Mathematical Proof:</b> The 4 environmental climate modes (M, T, RH, L) are fully controllable by the 4 actuators. Unactuated chemical states (5-11) are stabilizable via natural physical dissipation.
+          </div>
+
+          <b style="display:block; margin-top:3px;">B. Dual Observability Analysis (Viva Critical!):</b>
+          <div class="math-box">
+            <b>Case A (4 Primary Climate Sensors):</b> C<sub>prim</sub> = [I<sub>4&times;4</sub>, 0<sub>4&times;7</sub>]<br>
+            &rArr; <b>rank(Ob<sub>prim</sub>) = 4 / 11</b> &nbsp; <span class="stat-pill amber">Nutrients/Tank Unobservable</span><br>
+            <b>Case B (Dedicated 11-Transducer Suite):</b> C<sub>full</sub> = I<sub>11&times;11</sub><br>
+            &rArr; <b>rank(Ob<sub>full</sub>) = 11 / 11</b> &nbsp; <span class="stat-pill green">100% Fully Observable</span>
+          </div>
+        </div>
+
+        <div class="callout-box info">
+          <b>Examiner Takeaway:</b> Air sensors alone cannot reconstruct root-zone NPK or tank reserves. Dedicated chemical probes are mathematically mandatory.
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2, ROW 2: MODULE 6: TRI-HYBRID CONTROL SYNTHESIS -->
+    <div class="card" style="border-color: #4338ca;">
+      <div class="card-header bg-indigo">
+        <span>6. TRI-HYBRID CONTROLLER SYNTHESIS</span>
+        <span>Decentralized PID &bull; Pole Placement &bull; Optimal LQR-I</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>Law 1: Decentralized Multi-Loop PID + Anti-Windup Clamping:</b>
+          <div class="math-box">
+            u<sub>j</sub>(k) = clamp(K<sub>p</sub> e<sub>j</sub> + K<sub>i</sub> &int;e<sub>j</sub> dt + K<sub>d</sub> de<sub>j</sub>/dt, 0, 1)<br>
+            <b>Anti-Windup Logic:</b> Freeze integrator if (u &ge; 1 &and; e &gt; 0) &or; (u &le; 0 &and; e &lt; 0).
+          </div>
+
+          <b>Law 2: Scaled Subspace Pole Placement (Sylvester Solver):</b>
+          <div class="math-box green">
+            (A<sub>env</sub> &minus; &lambda;<sub>j</sub> I) x<sub>j</sub> = B<sub>env</sub> g<sub>j</sub> &rArr; K<sub>env</sub> = G X<sup>&minus;1</sup>, &nbsp; &lambda;<sub>des</sub> = {-0.6, -0.8, -1.0, -1.2}<br>
+            <b>Gain Scaling:</b> Maximum gain |K<sub>ij</sub>| &le; 0.2167 (Eliminates 10<sup>7</sup> gain explosion!).
+          </div>
+
+          <b>Law 3: Optimal LQR-I via Real Ordered Schur CARE Solver:</b>
+          <div class="math-box purple">
+            Symplectic Hamiltonian H = [A<sub>a</sub>, &minus;B<sub>a</sub>R<sup>&minus;1</sup>B<sub>a</sub><sup>T</sup>; &minus;Q<sub>a</sub>, &minus;A<sub>a</sub><sup>T</sup>] &in; R<sup>30&times;30</sup><br>
+            [U, T] = schur(H); ordschur(U, T, 'lhp'); P = Re(V<sub>2</sub> V<sub>1</sub><sup>&minus;1</sup>)<br>
+            Optimal feedback: <b>u = u<sub>0</sub><sup>*</sup> &minus; K<sub>x</sub> &delta;y<sub>meas</sub> &minus; K<sub>i</sub> z<sub>int</sub></b> &bull; Residual = 1.25&times;10<sup>&minus;10</sup>
+          </div>
+        </div>
+
+        <div style="font-size:6.2pt; color:#475569;">
+          Augmented state x<sub>a</sub> = [x; z] &in; R<sup>15</sup> guarantees asymptotic zero steady-state error.
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3, ROW 2: MODULE 7: SENSOR LAYER & SAFETY INTERLOCKS -->
+    <div class="card" style="border-color: #b91c1c;">
+      <div class="card-header bg-crimson">
+        <span>7. SENSOR LAYER & SAFETY INTERLOCKS</span>
+        <span>Sensor-in-the-Loop Architecture</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>A. Realistic Transducer Layer Simulation:</b>
+          <div class="math-box red">
+            y<sub>meas, i</sub> = clamp(x<sub>i</sub> + v<sub>i</sub>, y<sub>min, i</sub>, y<sub>max, i</sub>), &nbsp; v<sub>i</sub> ~ N(0, &sigma;<sub>i</sub><sup>2</sup>)<br>
+            &bull; Temp: &sigma;=0.20 &deg;C &bull; RH: &sigma;=0.80% &bull; Light: &sigma;=50 lux &bull; Moisture: &sigma;=0.50%
+          </div>
+          <div style="font-size:6.2pt; color:#475569;">
+            Controllers operate strictly on sensed values y<sub>meas</sub>, not idealized state x.
+          </div>
+
+          <b style="display:block; margin-top:3px;">B. Physical Bounds & Actuator Saturation:</b>
+          <div class="math-box red">
+            x<sub>bounded</sub> = clamp(x, x<sub>min</sub>, x<sub>max</sub>), &nbsp; 0 &le; M, RH, W &le; 100%<br>
+            Physical Actuator Saturation: u<sub>actual</sub> = clamp(u<sub>cmd</sub>, 0.0, 1.0)
+          </div>
+
+          <b style="display:block; margin-top:3px;">C. Automated Water-Level Safety Interlock:</b>
+          <div class="math-box red">
+            <b>IF x<sub>10</sub> (Water Tank) &lt; 10.0% THEN u<sub>actual</sub>(1) = 0.0 (Pump Cutoff)</b>
+          </div>
+        </div>
+
+        <div class="callout-box alert">
+          <b>Pump Cavitation Protection:</b> Prevents dry-run motor burnout during severe drought or tank drainage faults.
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 4, ROW 2: MODULE 8: BENCHMARK MATRIX & SCORECARD -->
+    <div class="card" style="border-color: #047857;">
+      <div class="card-header bg-emerald">
+        <span>8. QUANTITATIVE SCORECARD & BENCHMARK</span>
+        <span>Normalized 24-Hour Multi-Stage Test</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <b>Hierarchical Crop Condition Index (CCI / CESI):</b>
+          <div class="math-box green">
+            <b>CCI</b> = 0.50 &middot; CCI<sub>env</sub> + 0.25 &middot; CCI<sub>soil</sub> + 0.25 &middot; CCI<sub>nutr</sub><br>
+            Evaluated against FAO-56 & UC Davis physiological growth envelopes.
+          </div>
+
+          <table class="compact-tbl" style="margin-top:3px;">
+            <tr><th>Performance Metric</th><th>Decentralized PID</th><th>Pole Placement</th><th>Optimal LQR-I</th></tr>
+            <tr><td><b>Total ISE (Error Var)</b></td><td>1.53 &times; 10<sup>8</sup></td><td>8.04 &times; 10<sup>8</sup></td><td><b>1.57 &times; 10<sup>7</sup> (&minus;89.7%)</b></td></tr>
+            <tr><td><b>Total IAE (Tracking)</b></td><td>50,307.27</td><td>118,518.36</td><td><b>5,854.26</b></td></tr>
+            <tr><td><b>Total Variation (TV)</b></td><td>2,090.93</td><td><b>277.93</b></td><td>728.28</td></tr>
+            <tr><td><b>Mean Crop Score (CCI)</b></td><td>99.76%</td><td>98.37%</td><td><b>99.94%</b></td></tr>
+            <tr><td><b>Steady-State Error</b></td><td>Small offset</td><td>Offset</td><td><b>Zero (0.00)</b></td></tr>
+          </table>
+        </div>
+
+        <div class="callout-box info" style="background:#ecfdf5; border-color:#a7f3d0; color:#065f46;">
+          <b>LQR-I Supremacy:</b> Multivariable optimal cross-coordination yields 89.7% error variance reduction and superior noise immunity.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM TAKEAWAY PIPELINE FLOW -->
+  <div class="bottom-flow">
+    <div class="flow-step">
+      <div class="step-num">Step 1</div>
+      <div class="step-title">Agro-Plant Model</div>
+      <div class="step-sub">11 States, Soil Substrates</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">Step 2</div>
+      <div class="step-title">Equilibrium Trim</div>
+      <div class="step-sub">||dx0|| = 1.25e-10</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">Step 3</div>
+      <div class="step-title">Linearization</div>
+      <div class="step-sub">Central Diff Jacobians</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">Step 4</div>
+      <div class="step-title">Observability Test</div>
+      <div class="step-sub">4/11 vs 11/11 Proof</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step active">
+      <div class="step-num">Step 5</div>
+      <div class="step-title">Tri-Hybrid Control</div>
+      <div class="step-sub">PID / PP / LQR-I CARE</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">Step 6</div>
+      <div class="step-title">Sensor & Safety</div>
+      <div class="step-sub">Noise + Pump Cutoff</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">Step 7</div>
+      <div class="step-title">24h Benchmark</div>
+      <div class="step-sub">CCI & Scorecard Export</div>
+    </div>
+  </div>
+
+</body>
+</html>
