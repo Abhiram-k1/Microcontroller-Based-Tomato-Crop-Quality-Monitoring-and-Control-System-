@@ -618,9 +618,10 @@ This mathematically proves the Jacobian linearization is unbiased and exact.
 3. **Figure 3 (`comparison_crop_quality.png`)**: Environmental, soil, nutrient, and composite Crop Condition Index (CCI).
 4. **Figure 4 (`s_plane_pole_map.png`)**: Complex $s$-plane pole-zero map comparing open-loop vs Pole Placement vs LQR-I poles relative to the $\text{Re}(s) = 0$ stability boundary.
 5. **Figure 5 (`performance_scorecard.png`)**: Quantitative scorecard bar charts comparing $\log_{10}(\text{ISE})$, IAE, Total Variation (TV), and Mean CCI.
-6. **Master Methodology Presentation Board (`master_methodology_chart.png` / `.pdf`)**: Widescreen 16:9 complete project architecture chart containing all mathematical models, proofs, and pipeline flow in brief for presentation defense.
-7. **Phase 3 Deep-Dive Presentation Board (`phase3_control_methodology_chart.png` / `.pdf`)**: Widescreen 16:9 presentation slide completing the visual trilogy (Phase 1, Phase 2, Phase 3) detailing controllability, dual observability proofs, and tri-hybrid controller synthesis.
-8. **Dataset (`master_simulation_results.mat`)**: Complete simulation time histories and parameter structs.
+6. **Visual Methodology Flowchart Board (`visual_methodology_flowchart.png` / `.pdf`)**: Widescreen 16:9 visual flowchart board featuring full greenhouse anatomy illustrations, tomato crop 5-stage lifecycle graphics (🌱 &rarr; 🌿 &rarr; 🌼 &rarr; 🍏 &rarr; 🍅), S-plane modal map, and end-to-end mathematical proofs.
+7. **Master Methodology Architecture Chart (`master_methodology_chart.png` / `.pdf`)**: Widescreen 16:9 complete project architecture chart containing all mathematical models, proofs, and pipeline flow in brief for presentation defense.
+8. **Phase 3 Deep-Dive Presentation Board (`phase3_control_methodology_chart.png` / `.pdf`)**: Widescreen 16:9 presentation slide completing the visual trilogy (Phase 1, Phase 2, Phase 3) detailing controllability, dual observability proofs, and tri-hybrid controller synthesis.
+9. **Dataset (`master_simulation_results.mat`)**: Complete simulation time histories and parameter structs.
 
 ---
 

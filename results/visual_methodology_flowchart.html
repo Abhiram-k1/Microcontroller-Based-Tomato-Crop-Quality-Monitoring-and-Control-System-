@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>End-to-End Methodology Flowchart — 11-State Tomato Greenhouse System</title>
+<style>
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    width: 16in;
+    height: 9in;
+    margin: 0;
+    padding: 8px 12px;
+    background-color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  /* Header Banner */
+  .header-banner {
+    background: linear-gradient(135deg, #091e3a 0%, #0f3b75 55%, #1e40af 100%);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 6px solid #38bdf8;
+  }
+  .header-left h1 {
+    font-size: 14pt;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-left .subtitle {
+    font-size: 8pt;
+    color: #93c5fd;
+    font-weight: 500;
+    margin-top: 1px;
+  }
+  .header-badges {
+    display: flex;
+    gap: 6px;
+  }
+  .badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 6.8pt;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+  .badge.highlight {
+    background: #0284c7;
+    border-color: #38bdf8;
+    color: #ffffff;
+  }
+
+  /* Grid Layout: 5 Columns across the 16:9 widescreen canvas */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: 3.1fr 2.6fr 2.6fr 2.7fr 2.6fr;
+    gap: 8px;
+    flex: 1;
+    margin: 6px 0;
+  }
+
+  .col-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  /* Card styling */
+  .node-card {
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1.5px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    flex: 1;
+  }
+  .node-header {
+    padding: 3px 7px;
+    font-size: 7.2pt;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .node-body {
+    padding: 5px 7px;
+    flex: 1;
+    font-size: 6.4pt;
+    line-height: 1.32;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Color themes */
+  .bg-blue   { background: #0369a1; border-color: #0369a1; }
+  .bg-navy   { background: #0f3b75; border-color: #0f3b75; }
+  .bg-green  { background: #047857; border-color: #047857; }
+  .bg-amber  { background: #b45309; border-color: #b45309; }
+  .bg-purple { background: #6d28d9; border-color: #6d28d9; }
+  .bg-indigo { background: #4338ca; border-color: #4338ca; }
+  .bg-teal   { background: #0f766e; border-color: #0f766e; }
+  .bg-red    { background: #b91c1c; border-color: #b91c1c; }
+
+  /* Math & Code Blocks */
+  .math-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #0284c7;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: "Cambria Math", "Times New Roman", serif;
+    font-size: 6.8pt;
+    margin: 2px 0;
+  }
+  .math-box.amber { border-left-color: #d97706; }
+  .math-box.green { border-left-color: #059669; }
+  .math-box.purple{ border-left-color: #7c3aed; }
+  .math-box.red   { border-left-color: #dc2626; }
+  .math-box.teal  { border-left-color: #0f766e; }
+
+  /* Callout badges */
+  .callout {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 6pt;
+    color: #92400e;
+    margin-top: 2px;
+  }
+  .callout.info  { background: #e0f2fe; border-color: #bae6fd; color: #0369a1; }
+  .callout.alert { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+  .callout.green { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+
+  /* Compact Table */
+  table.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 5.8pt;
+    margin: 2px 0;
+  }
+  table.tbl th {
+    background: #f1f5f9;
+    color: #1e293b;
+    font-weight: 700;
+    padding: 1.5px 3px;
+    border: 1px solid #cbd5e1;
+  }
+  table.tbl td {
+    padding: 1.5px 3px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Bottom Takeaway Flow */
+  .bottom-flow {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .flow-step {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 3px 6px;
+    text-align: center;
+    flex: 1;
+    margin: 0 2px;
+  }
+  .flow-step.active {
+    background: #eff6ff;
+    border-color: #3b82f6;
+  }
+  .flow-step .step-title {
+    font-size: 6.6pt;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .flow-step .step-sub {
+    font-size: 5.4pt;
+    color: #475569;
+  }
+  .flow-arrow {
+    font-size: 9pt;
+    color: #94a3b8;
+    font-weight: bold;
+  }
+
+  .stat-pill {
+    display: inline-block;
+    padding: 1px 3px;
+    border-radius: 2px;
+    font-weight: 700;
+    font-size: 5.8pt;
+  }
+  .stat-pill.green { background: #dcfce7; color: #166534; }
+  .stat-pill.amber { background: #fef3c7; color: #92400e; }
+  .stat-pill.blue  { background: #dbeafe; color: #1e40af; }
+</style>
+</head>
+<body>
+
+  <!-- HEADER BANNER -->
+  <div class="header-banner">
+    <div class="header-left">
+      <h1>METHODOLOGY FLOWCHART &bull; 11-STATE TOMATO GREENHOUSE CONTROL SYSTEM</h1>
+      <div class="subtitle">Complete Scientific Pipeline: Plant Biology &amp; Greenhouse Anatomy &rarr; Soil Physics &rarr; Complete Equilibrium Trim &rarr; Linearization &rarr; Controllability &amp; Observability &rarr; Tri-Hybrid Synthesis &rarr; 24h Benchmark</div>
+    </div>
+    <div class="header-badges">
+      <div class="badge">Crop: <i>Solanum lycopersicum</i></div>
+      <div class="badge">100% Pure Base MATLAB</div>
+      <div class="badge highlight">Zero External Toolboxes</div>
+      <div class="badge">Master Kernel: <code>main.m</code></div>
+    </div>
+  </div>
+
+  <!-- MAIN 5-COLUMN FLOWCHART GRID -->
+  <div class="flow-grid">
+
+    <!-- ===================================================================== -->
+    <!-- COLUMN 1: GREENHOUSE ANATOMY & BOTANICAL LIFECYCLE                   -->
+    <!-- ===================================================================== -->
+    <div class="col-flow">
+
+      <!-- NODE 1A: GREENHOUSE PHYSICAL ANATOMY SVG -->
+      <div class="node-card" style="border-color: #0284c7; flex: 1.15;">
+        <div class="node-header bg-blue">
+          <span>1. GREENHOUSE ANATOMY &amp; SENSORS</span>
+          <span>ESP32 Transducer Suite</span>
+        </div>
+        <div class="node-body">
+          <!-- SVG Greenhouse Schematic -->
+          <svg viewBox="0 0 320 120" style="width: 100%; height: 95px; border-radius: 4px; background: #f0fdf4; border: 1px solid #bbf7d0;">
+            <!-- Sun & Sky -->
+            <circle cx="285" cy="22" r="14" fill="#fef08a" stroke="#eab308" stroke-width="1.5"/>
+            <path d="M285,4 L285,0 M285,40 L285,44 M267,22 L263,22 M303,22 L307,22 M272,9 L269,6 M298,35 L301,38 M272,35 L269,38 M298,9 L301,6" stroke="#eab308" stroke-width="1.2"/>
+            
+            <!-- Greenhouse Glass Frame -->
+            <polygon points="20,110 20,55 85,25 150,55 150,110" fill="rgba(224, 242, 254, 0.45)" stroke="#0369a1" stroke-width="1.8"/>
+            <polygon points="150,110 150,55 215,25 280,55 280,110" fill="rgba(224, 242, 254, 0.45)" stroke="#0369a1" stroke-width="1.8"/>
+            <line x1="85" y1="25" x2="85" y2="110" stroke="#0284c7" stroke-width="1" stroke-dasharray="2,2"/>
+            <line x1="215" y1="25" x2="215" y2="110" stroke="#0284c7" stroke-width="1" stroke-dasharray="2,2"/>
+            <line x1="20" y1="80" x2="280" y2="80" stroke="#0284c7" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- Soil Substrate Bed -->
+            <rect x="22" y="98" width="256" height="12" fill="#78350f" rx="2"/>
+            <text x="28" y="107" font-size="6" fill="#fef3c7" font-weight="bold">SOIL BED: Sandy | Loamy (Default) | Clay</text>
+
+            <!-- Tomato Plants with Leaves and Tomatoes -->
+            <!-- Plant 1 -->
+            <path d="M55,98 Q52,75 58,60" stroke="#15803d" stroke-width="2.5" fill="none"/>
+            <ellipse cx="48" cy="78" rx="6" ry="3" fill="#22c55e" transform="rotate(-20, 48, 78)"/>
+            <ellipse cx="65" cy="72" rx="6" ry="3" fill="#22c55e" transform="rotate(25, 65, 72)"/>
+            <ellipse cx="52" cy="62" rx="5" ry="2.5" fill="#22c55e" transform="rotate(-30, 52, 62)"/>
+            <circle cx="61" cy="78" r="3.5" fill="#dc2626"/>
+            <circle cx="64" cy="83" r="3" fill="#ef4444"/>
+
+            <!-- Plant 2 (Flowering & Green Fruit) -->
+            <path d="M120,98 Q125,75 118,58" stroke="#15803d" stroke-width="2.5" fill="none"/>
+            <ellipse cx="112" cy="80" rx="7" ry="3" fill="#22c55e" transform="rotate(-25, 112, 80)"/>
+            <ellipse cx="129" cy="74" rx="7" ry="3" fill="#22c55e" transform="rotate(20, 129, 74)"/>
+            <circle cx="114" cy="68" r="3.2" fill="#84cc16"/> <!-- Green tomato -->
+            <polygon points="124,62 126,60 128,62 127,64 125,64" fill="#eab308"/> <!-- Flower -->
+
+            <!-- Plant 3 (Mature Canopy with Red Fruit) -->
+            <path d="M185,98 Q182,72 188,55" stroke="#15803d" stroke-width="2.5" fill="none"/>
+            <ellipse cx="178" cy="75" rx="7" ry="3.5" fill="#22c55e" transform="rotate(-20, 178, 75)"/>
+            <ellipse cx="196" cy="70" rx="7" ry="3.5" fill="#22c55e" transform="rotate(25, 196, 70)"/>
+            <circle cx="193" cy="78" r="4.2" fill="#dc2626"/>
+            <circle cx="187" cy="84" r="3.6" fill="#ef4444"/>
+            <circle cx="180" cy="81" r="3.2" fill="#ef4444"/>
+
+            <!-- Actuators: Fan (u2), Mist (u3), Grow Light (u4), Pump (u1) -->
+            <!-- Fan (u2) -->
+            <circle cx="32" cy="45" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1"/>
+            <path d="M32,39 L32,51 M26,45 L38,45" stroke="#0284c7" stroke-width="1.8"/>
+            <text x="24" y="34" font-size="5" fill="#0284c7" font-weight="bold">Fan (u2)</text>
+
+            <!-- Grow Light Panel (u4) -->
+            <rect x="80" y="32" width="40" height="5" fill="#facc15" stroke="#ca8a04" stroke-width="1" rx="1"/>
+            <polygon points="80,37 70,65 130,65 120,37" fill="rgba(250, 204, 21, 0.15)"/>
+            <text x="82" y="29" font-size="5" fill="#a16207" font-weight="bold">LED Light (u4)</text>
+
+            <!-- Ultrasonic Mist (u3) -->
+            <circle cx="150" cy="38" r="3" fill="#38bdf8"/>
+            <circle cx="145" cy="48" r="1.5" fill="#7dd3fc" opacity="0.7"/>
+            <circle cx="155" cy="50" r="1.8" fill="#7dd3fc" opacity="0.7"/>
+            <circle cx="150" cy="54" r="2.2" fill="#7dd3fc" opacity="0.7"/>
+            <text x="140" y="32" font-size="5" fill="#0284c7" font-weight="bold">Mist (u3)</text>
+
+            <!-- Water Tank & Irrigation Pump (u1) with Interlock -->
+            <rect x="240" y="70" width="22" height="26" fill="#93c5fd" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+            <rect x="242" y="80" width="18" height="14" fill="#3b82f6"/>
+            <text x="243" y="78" font-size="4.5" fill="#1e3a8a" font-weight="bold">Tank W</text>
+            <circle cx="230" cy="85" r="4.5" fill="#f97316" stroke="#c2410c" stroke-width="1"/>
+            <text x="216" y="96" font-size="4.5" fill="#c2410c" font-weight="bold">Pump (u1)</text>
+            <path d="M226,85 L190,85 L125,85 L58,85" stroke="#f97316" stroke-width="1" stroke-dasharray="1.5,1.5"/>
+
+            <!-- Sensor Suite Callouts -->
+            <rect x="75" y="101" width="30" height="7" fill="#ffffff" stroke="#059669" rx="1.5"/>
+            <text x="77" y="106.5" font-size="4" fill="#047857" font-weight="bold">Capacitive v1.2</text>
+            <rect x="135" y="101" width="35" height="7" fill="#ffffff" stroke="#7c3aed" rx="1.5"/>
+            <text x="137" y="106.5" font-size="4" fill="#6d28d9" font-weight="bold">RS485 NPK/pH/EC</text>
+            <rect x="145" y="65" width="28" height="7" fill="#ffffff" stroke="#0284c7" rx="1.5"/>
+            <text x="147" y="70.5" font-size="4" fill="#0369a1" font-weight="bold">BME280/BH1750</text>
+          </svg>
+
+          <div style="font-size: 6.2pt; color: #1e293b; margin-top: 3px;">
+            <b>Mathematical State Vector (x &in; R<sup>11</sup>):</b><br>
+            [M, T, RH, L, pH, EC, N, P, K, W, VOC]<sup>T</sup> &bull; 4 Controls u &in; [0, 1]<sup>4</sup>
+          </div>
+        </div>
+      </div>
+
+      <!-- NODE 1B: TOMATO GROWTH PHASES LIFECYCLE SVG -->
+      <div class="node-card" style="border-color: #047857; flex: 1.05;">
+        <div class="node-header bg-green">
+          <span>2. BOTANICAL GROWTH PHASES</span>
+          <span>FAO-56 &amp; UC Davis VRIC</span>
+        </div>
+        <div class="node-body">
+          <!-- Visual Botanical Stages SVG -->
+          <svg viewBox="0 0 320 52" style="width: 100%; height: 46px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1;">
+            <!-- Stage 1: Germination -->
+            <g transform="translate(10, 0)">
+              <rect x="0" y="38" width="55" height="12" fill="#fef3c7" rx="2"/>
+              <text x="5" y="46" font-size="5" font-weight="bold" fill="#78350f">1. Germination</text>
+              <path d="M28,38 Q25,28 28,22" stroke="#16a34a" stroke-width="2" fill="none"/>
+              <ellipse cx="23" cy="22" rx="4" ry="2" fill="#22c55e" transform="rotate(-30, 23, 22)"/>
+              <ellipse cx="33" cy="22" rx="4" ry="2" fill="#22c55e" transform="rotate(30, 33, 22)"/>
+            </g>
+
+            <line x1="68" y1="26" x2="74" y2="26" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <!-- Stage 2: Vegetative -->
+            <g transform="translate(73, 0)">
+              <rect x="0" y="38" width="52" height="12" fill="#dcfce7" rx="2"/>
+              <text x="6" y="46" font-size="5" font-weight="bold" fill="#14532d">2. Vegetative</text>
+              <path d="M26,38 Q24,22 26,14" stroke="#15803d" stroke-width="2" fill="none"/>
+              <ellipse cx="18" cy="28" rx="5" ry="2.2" fill="#22c55e" transform="rotate(-25, 18, 28)"/>
+              <ellipse cx="34" cy="24" rx="5" ry="2.2" fill="#22c55e" transform="rotate(25, 34, 24)"/>
+              <ellipse cx="20" cy="18" rx="4.5" ry="2" fill="#22c55e" transform="rotate(-20, 20, 18)"/>
+              <ellipse cx="32" cy="15" rx="4.5" ry="2" fill="#22c55e" transform="rotate(20, 32, 15)"/>
+            </g>
+
+            <line x1="128" y1="26" x2="134" y2="26" stroke="#94a3b8" stroke-width="1.5"/>
+
+            <!-- Stage 3: Flowering -->
+            <g transform="translate(133, 0)">
+              <rect x="0" y="38" width="52" height="12" fill="#fef08a" rx="2"/>
+              <text x="8" y="46" font-size="5" font-weight="bold" fill="#713f12">3. Flowering</text>
+              <path d="M26,38 Q27,20 26,12" stroke="#15803d" stroke-width="2" fill="none"/>
+              <ellipse cx="18" cy="26" rx="5" ry="2.2" fill="#22c55e" transform="rotate(-25, 18, 26)"/>
+              <ellipse cx="34" cy="22" rx="5" ry="2.2" fill="#22c55e" transform="rotate(25, 34, 22)"/>
+              <!-- Yellow Flowers -->
+              <polygon points="26,10 28,7 30,10 29,12 27,12" fill="#eab308"/>
+              <polygon points="19,16 21,13 23,16 22,18 20,18" fill="#eab308"/>
+            </g>
+
+            <line x1="188" y1="26" x2="194" y2="26" stroke="#94a3b8" stroke-width="1.5"/>
+
+            <!-- Stage 4: Fruit Development -->
+            <g transform="translate(193, 0)">
+              <rect x="0" y="38" width="55" height="12" fill="#e0f2fe" rx="2"/>
+              <text x="4" y="46" font-size="5" font-weight="bold" fill="#075985">4. Fruit Dev.</text>
+              <path d="M28,38 Q26,20 28,10" stroke="#15803d" stroke-width="2" fill="none"/>
+              <ellipse cx="20" cy="25" rx="5" ry="2.2" fill="#22c55e" transform="rotate(-25, 20, 25)"/>
+              <ellipse cx="36" cy="20" rx="5" ry="2.2" fill="#22c55e" transform="rotate(25, 36, 20)"/>
+              <!-- Green Expanding Tomatoes -->
+              <circle cx="21" cy="18" r="3.8" fill="#84cc16"/>
+              <circle cx="34" cy="14" r="3.2" fill="#84cc16"/>
+            </g>
+
+            <line x1="251" y1="26" x2="257" y2="26" stroke="#94a3b8" stroke-width="1.5"/>
+
+            <!-- Stage 5: Maturity -->
+            <g transform="translate(256, 0)">
+              <rect x="0" y="38" width="55" height="12" fill="#fee2e2" rx="2"/>
+              <text x="8" y="46" font-size="5" font-weight="bold" fill="#991b1b">5. Maturity</text>
+              <path d="M28,38 Q29,20 28,10" stroke="#15803d" stroke-width="2" fill="none"/>
+              <ellipse cx="19" cy="25" rx="5" ry="2.2" fill="#22c55e" transform="rotate(-25, 19, 25)"/>
+              <ellipse cx="37" cy="22" rx="5" ry="2.2" fill="#22c55e" transform="rotate(25, 37, 22)"/>
+              <!-- Red Ripe Tomatoes -->
+              <circle cx="20" cy="17" r="4.5" fill="#dc2626"/>
+              <circle cx="34" cy="13" r="4.0" fill="#ef4444"/>
+            </g>
+          </svg>
+
+          <!-- Setpoint Reference Table -->
+          <table class="tbl">
+            <tr><th>Growth Stage</th><th>T<sub>opt</sub> (&deg;C)</th><th>RH<sub>opt</sub> (%)</th><th>M<sub>opt</sub> (%)</th><th>L<sub>opt</sub> (lux)</th></tr>
+            <tr><td><b>1. Germination</b> (0-2h)</td><td>24.0</td><td>72.5</td><td>70.0</td><td>10,000</td></tr>
+            <tr><td><b>2. Vegetative</b> (2-8h)</td><td>25.0</td><td>65.0</td><td>60.0</td><td>18,000</td></tr>
+            <tr><td><b>3. Flowering</b> (8-12h)</td><td>23.5</td><td>62.5</td><td>58.0</td><td>22,500</td></tr>
+            <tr><td><b>4. Fruit Dev.</b> (12-18h)</td><td>25.0</td><td>60.0</td><td>65.0</td><td>22,500</td></tr>
+            <tr><td><b>5. Maturity</b> (18-24h)</td><td>22.5</td><td>55.0</td><td>55.0</td><td>20,000</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- COLUMN 2: NONLINEAR MODEL & SOIL KINETICS                             -->
+    <!-- ===================================================================== -->
+    <div class="col-flow">
+
+      <!-- NODE 2A: COUPLED PLANT ODEs -->
+      <div class="node-card" style="border-color: #b45309; flex: 1.15;">
+        <div class="node-header bg-amber">
+          <span>3. COUPLED PLANT EQUATIONS</span>
+          <span>dx/dt = f(x, u, d)</span>
+        </div>
+        <div class="node-body">
+          <div>
+            <b>Climate State Derivatives:</b>
+            <div class="math-box amber">
+              <b>dM/dt</b> = &gamma;&middot;u<sub>1</sub> &minus; E<sub>loss</sub> &minus; D<br>
+              &nbsp;&nbsp; D = k<sub>drain</sub> max(M &minus; M<sub>th</sub>, 0)<br>
+              &nbsp;&nbsp; E<sub>loss</sub> = k<sub>evap</sub> E [1 + 0.01 max(T&minus;25, 0)]<br>
+              <b>dT/dt</b> = 0.15(T<sub>ext</sub> &minus; T) + 0.00008 L &minus; 3.0 u<sub>2</sub><br>
+              <b>dRH/dt</b> = 8.0 u<sub>3</sub> &minus; 4.0 u<sub>2</sub> &minus; 0.15 max(T&minus;25, 0)<br>
+              <b>dL/dt</b> = 0.5(L<sub>nat</sub> &minus; L) + 30,000 u<sub>4</sub>
+            </div>
+
+            <b>Soil Substrates:</b>
+            <div style="font-size: 5.8pt; color: #334155; margin-top: 1px;">
+              &bull; <b>Sandy:</b> k<sub>d</sub>=0.045, &gamma;=14.0, k<sub>evap</sub>=2.60<br>
+              &bull; <b>Loamy:</b> k<sub>d</sub>=0.020, &gamma;=12.0, k<sub>evap</sub>=2.00<br>
+              &bull; <b>Clay:</b> k<sub>d</sub>=0.008, &gamma;=9.5, k<sub>evap</sub>=1.40
+            </div>
+          </div>
+
+          <div class="callout green">
+            <b>Physical Meaning:</b> Non-linear couplings: ventilation simultaneously cools (u<sub>2</sub>) and dehumidifies (-4u<sub>2</sub>); lighting (u<sub>4</sub>) adds heat (+0.00008L).
+          </div>
+        </div>
+      </div>
+
+      <!-- NODE 2B: TRANSPIRATION & SUBSTRATE CHEMISTRY -->
+      <div class="node-card" style="border-color: #0f766e; flex: 1.05;">
+        <div class="node-header bg-teal">
+          <span>4. TRANSPIRATION &amp; NUTRIENTS</span>
+          <span>NPK Kinetics</span>
+        </div>
+        <div class="node-body">
+          <div>
+            <b>Transpiration Crop Demand:</b>
+            <div class="math-box teal">
+              &tau; = [0.50 + 0.50(L/25000)] &times; [1 + 0.02 max(T&minus;22, 0)]
+            </div>
+
+            <b>Macronutrient Fertigation &amp; Leaching:</b>
+            <div class="math-box teal">
+              <b>dN/dt</b> = 22 u<sub>1</sub> &minus; 3.8&tau; &minus; 0.05 L<sub>fac</sub> D (N/100) + 0.03(130&minus;N)<br>
+              <b>dP/dt</b> = 7.5 u<sub>1</sub> &minus; 1.2&tau; &minus; 0.02 L<sub>fac</sub> D (P/50) + 0.02(48&minus;P)<br>
+              <b>dK/dt</b> = 28 u<sub>1</sub> &minus; 4.8&tau; &minus; 0.04 L<sub>fac</sub> D (K/150) + 0.03(190&minus;K)
+            </div>
+
+            <b>Tank &amp; VOC Balance:</b>
+            <div style="font-size: 5.8pt; color: #475569;">
+              dW/dt = [0.05(80&minus;W) + q<sub>refill</sub>] &minus; (0.5E + 0.2u<sub>1</sub>)<br>
+              dVOC/dt = 0.05(100&minus;VOC) + 0.10 max(T&minus;30, 0)
+            </div>
+          </div>
+
+          <div class="callout info">
+            Fertigation delivers ions via pump (u<sub>1</sub>); crop transpires water/nutrients; drainage D leaches excess salts.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- COLUMN 3: EQUILIBRIUM TRIM & NUMERICAL LINEARIZATION                  -->
+    <!-- ===================================================================== -->
+    <div class="col-flow">
+
+      <!-- NODE 3A: 11-STATE EQUILIBRIUM TRIM & VERIFICATION GATE -->
+      <div class="node-card" style="border-color: #047857; flex: 1.15;">
+        <div class="node-header bg-green">
+          <span>5. COMPLETE EQUILIBRIUM TRIM</span>
+          <span>Gate: ||dx0|| &approx; 0</span>
+        </div>
+        <div class="node-body">
+          <div>
+            <b>A. Environmental Inversion (dx<sub>1:4</sub>/dt = 0):</b>
+            <div class="math-box green">
+              u<sub>1</sub><sup>*</sup> = [E<sub>loss</sub> + D] / &gamma;<sub>irr</sub> = <b>15.0%</b> (Pump)<br>
+              u<sub>2</sub><sup>*</sup> = [0.15(T<sub>ext</sub>&minus;T<sup>*</sup>) + 0.00008L<sup>*</sup>] / 3 = <b>40.0%</b> (Fan)<br>
+              u<sub>3</sub><sup>*</sup> = [4 u<sub>2</sub><sup>*</sup> &minus; (&minus;0.15 max(T<sup>*</sup>&minus;25,0))] / 8 = <b>20.0%</b><br>
+              u<sub>4</sub><sup>*</sup> = max(0, L<sup>*</sup> &minus; L<sub>nat</sub>) / 30000 = <b>0.0%</b> (Light)
+            </div>
+
+            <b>B. Chemical Stationary Equilibrium:</b>
+            <div style="font-size: 5.8pt; color: #334155;">
+              N<sup>*</sup> = 132.8 mg/kg, &nbsp; P<sup>*</sup> = 48.2 mg/kg, &nbsp; K<sup>*</sup> = 189.5 mg/kg<br>
+              pH<sup>*</sup> = 6.37, &nbsp; EC<sup>*</sup> = 2.41 dS/m, &nbsp; W<sup>*</sup> = 80%, &nbsp; VOC<sup>*</sup> = 100
+            </div>
+          </div>
+
+          <!-- VERIFICATION GATE BADGE -->
+          <div class="callout alert" style="border-width: 1.5px;">
+            <b>VERIFICATION GATE: ||dx<sub>0</sub>/dt||<sub>&infin;</sub> = 1.25 &times; 10<sup>&minus;10</sup></b><br>
+            <i>Proof:</i> Exact equilibrium across all 11 states simultaneously. Eliminates non-equilibrium linearization drift!
+          </div>
+        </div>
+      </div>
+
+      <!-- NODE 3B: UNBIASED LINEARIZATION & STEP VALIDATION -->
+      <div class="node-card" style="border-color: #6d28d9; flex: 1.05;">
+        <div class="node-header bg-purple">
+          <span>6. LINEARIZATION &amp; VALIDATION</span>
+          <span>A (11&times;11), B (11&times;4)</span>
+        </div>
+        <div class="node-body">
+          <div>
+            <b>Central Difference Jacobians (h = 10<sup>&minus;6</sup>):</b>
+            <div class="math-box purple">
+              A(:, i) = [f(x<sub>0</sub>+he<sub>i</sub>) &minus; f(x<sub>0</sub>&minus;he<sub>i</sub>)] / (2h)<br>
+              B(:, j) = [f(u<sub>0</sub>+he<sub>j</sub>) &minus; f(u<sub>0</sub>)] / h &nbsp; <i>(u &in; [0, 1])</i>
+            </div>
+
+            <b>Step Perturbation Verification:</b>
+            <div class="math-box purple">
+              Step &delta;u<sub>1</sub> = +10% pump over 4h:<br>
+              &delta;M<sub>L</sub> = +3.398%, &nbsp; &delta;M<sub>NL</sub> = +3.398%<br>
+              <b>||&delta;x<sub>NL</sub> &minus; &delta;x<sub>L</sub>||<sub>&infin;</sub> &lt; 10<sup>&minus;9</sup>%</b> (Exact local consistency!)
+            </div>
+          </div>
+
+          <div class="callout alert">
+            <b>LINEARIZATION IS LOCAL &mdash; NOT GLOBAL:</b><br>
+            A and B change with operating point, soil substrate, and growth phase!
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- COLUMN 4: CONTROLLABILITY & DUAL OBSERVABILITY                         -->
+    <!-- ===================================================================== -->
+    <div class="col-flow">
+
+      <!-- NODE 4A: MODAL ANALYSIS & CONTROLLABILITY -->
+      <div class="node-card" style="border-color: #0f766e; flex: 1.15;">
+        <div class="node-header bg-teal">
+          <span>7. MODAL MAP &amp; CONTROLLABILITY</span>
+          <span>Kalman Decomposition</span>
+        </div>
+        <div class="node-body">
+          <!-- S-Plane SVG -->
+          <svg viewBox="0 0 200 65" style="width: 100%; height: 50px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1;">
+            <!-- Stable Region Shading -->
+            <rect x="5" y="5" width="115" height="55" fill="#f0fdf4" opacity="0.8"/>
+            <text x="12" y="15" font-size="5" fill="#16a34a" font-weight="bold">STABLE (LHP)</text>
+            <rect x="120" y="5" width="75" height="55" fill="#fef2f2" opacity="0.8"/>
+            <text x="125" y="15" font-size="5" fill="#dc2626" font-weight="bold">UNSTABLE</text>
+
+            <!-- Axes -->
+            <line x1="5" y1="35" x2="195" y2="35" stroke="#64748b" stroke-width="1"/>
+            <text x="180" y="42" font-size="5" fill="#475569">&sigma;</text>
+            <line x1="120" y1="5" x2="120" y2="60" stroke="#dc2626" stroke-width="1.2" stroke-dasharray="2,2"/>
+            <text x="110" y="12" font-size="5" fill="#dc2626">j&omega;</text>
+
+            <!-- Open-loop Poles (x) -->
+            <text x="118" y="38" font-size="8" fill="#000000" font-weight="bold">&times;</text> <!-- lambda_H = 0 -->
+            <text x="100" y="38" font-size="8" fill="#000000" font-weight="bold">&times;</text> <!-- lambda_M = -0.02 -->
+            <text x="75" y="38" font-size="8" fill="#000000" font-weight="bold">&times;</text> <!-- lambda_T = -0.15 -->
+            <text x="40" y="38" font-size="8" fill="#000000" font-weight="bold">&times;</text> <!-- lambda_L = -0.50 -->
+
+            <!-- Closed Loop Poles (o) LQR-I / PP deeper in LHP -->
+            <circle cx="65" cy="25" r="2.5" fill="#3b82f6" stroke="#1d4ed8"/>
+            <circle cx="65" cy="45" r="2.5" fill="#3b82f6" stroke="#1d4ed8"/>
+            <circle cx="35" cy="35" r="2.5" fill="#3b82f6" stroke="#1d4ed8"/>
+            <circle cx="50" cy="35" r="2.5" fill="#3b82f6" stroke="#1d4ed8"/>
+            <text x="25" y="52" font-size="4.5" fill="#1d4ed8" font-weight="bold">Closed-Loop LQR-I</text>
+          </svg>
+
+          <div>
+            <b>Controllability Matrix:</b>
+            <div class="math-box teal">
+              <b>Co</b> = [B, AB, ..., A<sup>10</sup>B] &rArr; <b>rank(Co) = 4 / 11</b><br>
+              <i>Proof:</i> 4 climate states directly controllable. 7 substrate modes are passively <b>stabilizable</b> via self-dissipation.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NODE 4B: DUAL OBSERVABILITY PROOF -->
+      <div class="node-card" style="border-color: #b45309; flex: 1.05;">
+        <div class="node-header bg-amber">
+          <span>8. DUAL OBSERVABILITY PROOF</span>
+          <span>4 vs 11 Transducers</span>
+        </div>
+        <div class="node-body">
+          <div>
+            <b>Case A: 4 Primary Air Sensors:</b>
+            <div class="math-box amber">
+              C<sub>prim</sub> = [I<sub>4&times;4</sub>, 0<sub>4&times;7</sub>] &rArr; <b>rank(Ob) = 4 / 11</b><br>
+              <span class="stat-pill amber">Nutrients/Tank Unobservable</span>
+            </div>
+            <div style="font-size: 5.6pt; color: #475569;">
+              Air sensors provide zero mathematical observability of root NPK or water storage.
+            </div>
+
+            <b style="margin-top:2px; display:block;">Case B: Dedicated 11-Transducer Suite:</b>
+            <div class="math-box green">
+              C<sub>full</sub> = I<sub>11&times;11</sub> &rArr; <b>rank(Ob) = 11 / 11</b><br>
+              <span class="stat-pill green">100% Fully Observable</span>
+            </div>
+          </div>
+
+          <div class="callout alert">
+            <b>Examiner Proof:</b> Mathematically proves dedicated agrochemical probes are mandatory for greenhouse nutrient control!
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- COLUMN 5: TRI-HYBRID CONTROL LAWS & BENCHMARK SCORECARD               -->
+    <!-- ===================================================================== -->
+    <div class="col-flow">
+
+      <!-- NODE 5A: TRI-HYBRID CONTROLLER LAWS -->
+      <div class="node-card" style="border-color: #4338ca; flex: 1.15;">
+        <div class="node-header bg-indigo">
+          <span>9. TRI-HYBRID CONTROL LAWS</span>
+          <span>PID &bull; Pole Placement &bull; LQR-I</span>
+        </div>
+        <div class="node-body">
+          <div>
+            <b>1. Decentralized PID + Anti-Windup Clamping:</b>
+            <div class="math-box">
+              u<sub>raw</sub> = K<sub>p</sub> e + K<sub>i</sub> &int;e dt + K<sub>d</sub> de/dt<br>
+              <i>Anti-Windup:</i> Freeze &int;e if (u&ge;1 &and; e&gt;0) &or; (u&le;0 &and; e&lt;0).
+            </div>
+
+            <b>2. Scaled Subspace Pole Placement:</b>
+            <div class="math-box green">
+              (A<sub>env</sub> &minus; &lambda;<sub>j</sub>I) x<sub>j</sub> = B<sub>env</sub> g<sub>j</sub> &rArr; K<sub>env</sub> = G X<sup>&minus;1</sup><br>
+              <i>Bound:</i> |K<sub>ij</sub>| &le; 0.2167 (Erases 10<sup>7</sup> gain explosion!).
+            </div>
+
+            <b>3. Optimal LQR-I via Real Schur CARE:</b>
+            <div class="math-box purple">
+              H = [A<sub>a</sub>, &minus;B<sub>a</sub>R<sup>&minus;1</sup>B<sub>a</sub><sup>T</sup>; &minus;Q<sub>a</sub>, &minus;A<sub>a</sub><sup>T</sup>] &in; R<sup>30&times;30</sup><br>
+              [U, T] = schur(H); ordschur(U, T, 'lhp'); P = Re(V<sub>2</sub>V<sub>1</sub><sup>&minus;1</sup>)<br>
+              u = u<sub>0</sub><sup>*</sup> &minus; K<sub>x</sub> &delta;y &minus; K<sub>i</sub> z<sub>int</sub> &bull; Res = 1.25&times;10<sup>&minus;10</sup>
+            </div>
+          </div>
+
+          <div class="callout green">
+            <b>Asymptotic Zero Error:</b> Integrator state z<sub>int</sub> eliminates disturbance offsets across all 5 growth phases.
+          </div>
+        </div>
+      </div>
+
+      <!-- NODE 5B: SAFETY INTERLOCK & SCORECARD -->
+      <div class="node-card" style="border-color: #b91c1c; flex: 1.05;">
+        <div class="node-header bg-red">
+          <span>10. SAFETY &amp; 24H BENCHMARK</span>
+          <span>Interlocks &amp; Scorecard</span>
+        </div>
+        <div class="node-body">
+          <div>
+            <b>Safety Interlocks &amp; Sensor Noise:</b>
+            <div class="math-box red">
+              &bull; Sensed: y<sub>meas</sub> = clamp(x + v, min, max), v ~ N(0, &sigma;<sup>2</sup>)<br>
+              &bull; Actuator Saturation: u<sub>act</sub> = clamp(u<sub>cmd</sub>, 0, 1)<br>
+              &bull; <b>Emergency Interlock: IF W &lt; 10% THEN u<sub>act</sub>(1) = 0</b>
+            </div>
+
+            <!-- Benchmark Table -->
+            <table class="tbl">
+              <tr><th>Metric</th><th>PID</th><th>PP</th><th>Optimal LQR-I</th></tr>
+              <tr><td><b>Total ISE</b></td><td>1.53&times;10<sup>8</sup></td><td>8.04&times;10<sup>8</sup></td><td><b>1.57&times;10<sup>7</sup> (-89.7%)</b></td></tr>
+              <tr><td><b>Total IAE</b></td><td>50,307</td><td>118,518</td><td><b>5,854</b></td></tr>
+              <tr><td><b>TV (Chatter)</b></td><td>2,090.9</td><td><b>277.9</b></td><td>728.3</td></tr>
+              <tr><td><b>Mean CCI</b></td><td>99.76%</td><td>98.37%</td><td><b>99.94%</b></td></tr>
+            </table>
+          </div>
+
+          <div class="callout green" style="background:#ecfdf5; border-color:#a7f3d0; color:#065f46;">
+            <b>Crop Condition Index:</b> CCI = 0.50&middot;CCI<sub>env</sub> + 0.25&middot;CCI<sub>soil</sub> + 0.25&middot;CCI<sub>nutr</sub> = <b>99.94%</b>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- BOTTOM TAKEAWAY PIPELINE FLOW -->
+  <div class="bottom-flow">
+    <div class="flow-step">
+      <div class="step-title">1. Plant &amp; Sensors</div>
+      <div class="step-sub">11 States, ESP32 Layer</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">2. Botanical Stages</div>
+      <div class="step-sub">5 FAO-56 Phases</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">3. Nonlinear ODEs</div>
+      <div class="step-sub">Sandy, Loamy, Clay</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">4. Equilibrium Trim</div>
+      <div class="step-sub">||dx0|| = 1.25e-10</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">5. Linearization</div>
+      <div class="step-sub">Central Diff Jacobians</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">6. Modal Diagnostics</div>
+      <div class="step-sub">Ctrb 4/11 &bull; Obsv 11/11</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step active">
+      <div class="step-title">7. Tri-Hybrid Control</div>
+      <div class="step-sub">PID / PP / LQR-I CARE</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">8. Safety &amp; Interlock</div>
+      <div class="step-sub">W &lt; 10% Pump Cutoff</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-title">9. 24h Benchmark</div>
+      <div class="step-sub">CCI 99.94% &bull; -89.7% ISE</div>
+    </div>
+  </div>
+
+</body>
+</html>
