@@ -1,0 +1,12 @@
+# MATLAB temporary and cache files
+*.asv
+*.m~
+*.slxc
+slprj/
+*.mex*
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
