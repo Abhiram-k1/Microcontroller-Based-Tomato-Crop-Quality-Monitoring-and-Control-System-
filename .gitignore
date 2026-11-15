@@ -1,12 +1,25 @@
 # MATLAB temporary and cache files
 *.asv
 *.m~
-*.slxc
-slprj/
 *.mex*
 *.log
+*.autosave
+
+# Simulink generated caches and compilation files
+*.slxc
+slprj/
+codegen/
+
+# MATLAB figure cache
+*.fig
 
 # OS generated files
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Python / editor caches
+__pycache__/
+*.pyc
+.vscode/
+.idea/

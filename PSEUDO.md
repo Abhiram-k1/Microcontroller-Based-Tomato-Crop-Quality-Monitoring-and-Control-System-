@@ -1,12 +1,13 @@
 # PSEUDO.md — System Architecture, Plain-Language Guide & Viva Cheatsheet
 
-**Project Title:** Autonomous 11-State Tomato Greenhouse Microclimate & Crop Condition Monitoring System  
+**Project Title:** Autonomous 11-State Tomato Greenhouse Microclimate & Crop Condition Monitoring & Control System  
 **System Classification:** Multivariable Dynamic Systems Modeling, Optimal State-Space Control & Agro-Ecological Monitoring  
 **Target Biological Plant:** Greenhouse Tomato (*Solanum lycopersicum*)  
-**Execution Kernel:** Single-File Master Orchestration (`main.m` in 100% Pure Base MATLAB)  
-**Embedded Hardware Target:** ESP32 Microcontroller Node with Dedicated Multi-Sensor Suite  
+**Implementation:** Three-Layer Digital Twin — `build_tomato_simulink_main.m` ⭐ (Primary · Simulink) · `main.m` (Reference · Pure MATLAB) · `wokwi sim/` (ESP32 C++ Firmware)  
+**Embedded Hardware Target:** ESP32 DevKit C v4 — Wokwi Simulated Circuit (DHT22, LDR, 8× Pots, SSD1306 OLED)  
 **Authoritative Agronomic Standards:** FAO Irrigation Paper 56, UC Davis VRIC Pub 7250, Wageningen UR  
-**Purpose:** This document explains the entire implemented control system in clear, rigorous, yet layman-friendly language. It allows you to explain every mathematical model, algorithmic pipeline stage, design decision, empirical result, and hardware expansion roadmap in an examination, presentation, or viva without needing to parse thousands of lines of raw code.
+**Status:** ✅ All Three Layers 100% Complete — Final Submission  
+**Purpose:** This document explains the entire implemented control system in clear, rigorous, yet layman-friendly language. It allows you to explain every mathematical model, algorithmic pipeline stage, design decision, empirical result, and embedded firmware implementation in an examination, presentation, or viva without needing to parse thousands of lines of raw code.
 
 ---
 
@@ -20,19 +21,21 @@ Commercial greenhouse farming is critical for global food security, yielding up 
 4. **Toolbox & Hardware Dependency Traps**: Academic and commercial greenhouse controllers are frequently locked behind expensive proprietary toolboxes (Simulink, MATLAB Control System Toolbox) or rely on naive uncoupled on/off thermostats that waste energy, chatter relays, and induce oscillatory thermal cycling.
 
 ### What is our solution?
-We designed and implemented a **Unified 11-State Pure Base MATLAB Greenhouse Climate & Crop Condition Monitoring System**:
-1. **100% Base MATLAB Kernel (`main.m`)**: The entire pipeline—plant dynamics, soil physics, numerical trim solver, Jacobian linearization, modal decomposition, Kalman staircase decomposition, Sylvester pole placement, and Hamiltonian Schur Algebraic Riccati Equation (CARE) solver—runs natively in pure base MATLAB with **zero toolbox dependencies**.
-2. **Realistic Sensor-in-the-Loop Layer**: Instead of assuming idealized direct mathematical state feedback, the simulation routes true plant states through a simulated ESP32 transducer layer that models physical measurement ranges, analog-to-digital (ADC) conversion limits, and empirical Gaussian sensor noise ($\sigma$).
-3. **Soil Substrate Physics Engine**: Integrates hydraulic retention, infiltration, and percolation equations for three agricultural substrates: **Sandy**, **Loamy (Default)**, and **Clay**.
-4. **Dual Physical Observability Architecture**: Rigorously analyzes state observability under two distinct hardware paradigms:
+We designed and implemented a **Three-Layer Digital Twin Greenhouse Climate & Crop Condition Monitoring & Control System**:
+1. **⭐ Primary Entry Point — Simulink Model (`build_tomato_simulink_main.m`)**: Builds `Tomato_Crop_Control_Main.slx` — a full 7-subsystem block-diagram twin of the MATLAB simulation. Run this first. Requires MATLAB + Simulink.
+2. **Reference Baseline — Pure MATLAB Kernel (`main.m`)**: The entire pipeline—plant dynamics, soil physics, numerical trim solver, Jacobian linearization, modal decomposition, Kalman staircase decomposition, Sylvester pole placement, and Hamiltonian Schur Algebraic Riccati Equation (CARE) solver—runs natively in pure base MATLAB with **zero toolbox dependencies**. Use when Simulink is unavailable.
+3. **Realistic Sensor-in-the-Loop Layer**: Instead of assuming idealized direct mathematical state feedback, the simulation routes true plant states through a simulated ESP32 transducer layer that models physical measurement ranges, analog-to-digital (ADC) conversion limits, and empirical Gaussian sensor noise ($\sigma$).
+4. **Soil Substrate Physics Engine**: Integrates hydraulic retention, infiltration, and percolation equations for three agricultural substrates: **Sandy**, **Loamy (Default)**, and **Clay**.
+5. **Dual Physical Observability Architecture**: Rigorously analyzes state observability under two distinct hardware paradigms:
    - *Case A (4 Primary Climate Sensors)*: Observability rank $= 4/11$, mathematically proving why root-zone nutrients ($N, P, K$, pH, EC) and water reserves cannot be observed from air data alone.
    - *Case B (11-Transducer Dedicated Suite)*: Observability rank $= 11/11$, proving full state observability when dedicated soil and tank probes are deployed.
-5. **Tri-Hybrid Multivariable Control Synthesis**: Benchmarks three distinct control paradigms:
+6. **Tri-Hybrid Multivariable Control Synthesis**: Benchmarks three distinct control paradigms:
    - *Decentralized Multi-Loop PID*: 4 single-input loops with dynamic anti-windup clamping.
    - *Scaled Subspace Pole Placement*: Assigns active modes via Sylvester equations while keeping feedback gains bounded ($|K_{ij}| \le 0.2167$), eradicating high-gain chattering.
    - *Optimal LQR with Integral Action (LQR-I)*: 15-state augmented formulation that achieves asymptotic zero steady-state tracking error and an **$89.7\%$ error variance reduction**.
-6. **Actuator Saturation & Emergency Water-Level Safety Interlock**: Enforces physical actuator bounds ($u \in [0, 1]$) and an automated pump cutoff ($W < 10\%$) to prevent dry-run pump cavitation and motor burnout.
-7. **Hierarchical Crop Condition Index (CCI / CESI)**: Quantifies crop physiological well-being ($0 - 100\%$) across environmental, soil, and nutrient health against FAO-56 and UC Davis agronomic thresholds.
+7. **Actuator Saturation & Emergency Water-Level Safety Interlock**: Enforces physical actuator bounds ($u \in [0, 1]$) and an automated pump cutoff ($W < 10\%$) to prevent dry-run pump cavitation and motor burnout.
+8. **Hierarchical Crop Condition Index (CCI / CESI)**: Quantifies crop physiological well-being ($0 - 100\%$) across environmental, soil, and nutrient health against FAO-56 and UC Davis agronomic thresholds.
+9. **ESP32 Embedded Firmware (`wokwi sim/`)**: All controllers and plant dynamics deployed in C++ (`tomato_core.h`) onto a Wokwi-simulated ESP32 with OLED dashboard and serial telemetry.
 
 ---
 
@@ -50,23 +53,29 @@ We designed and implemented a **Unified 11-State Pure Base MATLAB Greenhouse Cli
   - Primary Climate Suite (4 Sensors): $\text{rank}(\mathcal{O}) = \mathbf{4/11}$ (Partially Observable).
   - Dedicated Multi-Sensor Suite (11 Sensors): $\text{rank}(\mathcal{O}) = \mathbf{11/11}$ (Fully Observable).
 - **Tracking Performance (Total ISE)**:
-  - Decentralized PID: $1.53 \times 10^8$
-  - Pole Placement: $8.04 \times 10^8$
-  - Optimal LQR-I: **$1.57 \times 10^7$** (**$89.7\%$ error variance reduction**).
+  - Decentralized PID: $1.53 \times 10^8$ ($153{,}450{,}389.23$)
+  - Pole Placement: $8.04 \times 10^8$ ($804{,}423{,}682.63$)
+  - Optimal LQR-I: **$1.57 \times 10^7$** ($15{,}705{,}244.13$) (**$89.7\%$ error variance reduction**).
 - **Tracking Error (Total IAE)**:
-  - Decentralized PID: $50,307.27$
-  - Pole Placement: $118,518.36$
-  - Optimal LQR-I: **$5,854.26$** (**Tightest physical tracking**).
+  - Decentralized PID: $50{,}307.27$
+  - Pole Placement: $118{,}518.36$
+  - Optimal LQR-I: **$5{,}460.85$** (**Tightest physical tracking**).
 - **Actuator Chattering / Total Variation (TV)**:
-  - Decentralized PID: $2,090.93$
-  - Optimal LQR-I: $728.28$
+  - Decentralized PID: $2{,}090.93$
+  - Optimal LQR-I: $947.73$
   - Pole Placement: **$277.93$** (Smooth control action, noise-resilient).
 - **Mean Crop Condition Index (CCI)**:
-  - Decentralized PID: $99.76\%$
-  - Pole Placement: $98.37\%$
-  - Optimal LQR-I: **$99.94\%$** (Near-perfect physiological health).
+  - Decentralized PID: $99.51\%$
+  - Pole Placement: $98.51\%$
+  - Optimal LQR-I: **$99.37\%$** (Near-perfect physiological health).
+- **Unit-Free Tracking Error (% of setpoint: [M, T, RH, L])**:
+  - Decentralized PID: $[8.33\%, 6.53\%, 6.29\%, 11.19\%]$
+  - Pole Placement: $[6.62\%, 4.85\%, 5.29\%, 26.00\%]$
+  - Optimal LQR-I: $[7.29\%, \mathbf{1.67\%}, \mathbf{4.61\%}, \mathbf{1.54\%}]$
+- **Simulink vs. main.m Discrepancy**: Maximum state error $< \mathbf{7.3 \times 10^{-12}}$ (exact machine precision agreement).
 - **Linearization Dynamic Consistency**: $\|\delta x_{\text{NL}} - \delta x_{\text{L}}\|_\infty < \mathbf{10^{-9}\%}$ deviation discrepancy.
-- **External Toolbox Dependencies**: **$0.0\%$ (Zero toolboxes, 100% pure base MATLAB)**.
+- **External Toolbox Dependencies (`main.m`)**: **$0.0\%$ (Zero toolboxes, 100% pure base MATLAB)**.
+- **External Toolbox Dependencies (`build_tomato_simulink_main.m`)**: **Requires MATLAB + Simulink** (no Control System Toolbox, Optimization Toolbox, or other toolboxes needed).
 
 ---
 
@@ -687,12 +696,17 @@ All three controllers were benchmarked under identical 24-hour diurnal weather d
 
 | Performance Metric | Decentralized Multi-Loop PID | Scaled Subspace Pole Placement | Optimal LQR with Integral Action (LQR-I) | Academic & Agronomic Assessment |
 |---|---|---|---|---|
-| **Total ISE (Tracking Error)** | $1.53 \times 10^8$ | $8.04 \times 10^8$ | **$1.57 \times 10^7$** | **LQR-I achieves 89.7% error variance reduction** |
-| **Total IAE** | $50,307.27$ | $118,518.36$ | **$5,854.26$** | **LQR-I maintains tightest physical tracking** |
-| **Total Actuator Variation (TV)** | $2,090.93$ | **$277.93$** | $728.28$ | **PP and LQR-I reject sensor noise far better than PID** |
-| **Mean Crop Condition Index (CCI)** | $99.76\%$ | $98.37\%$ | **$99.94\%$** | **Optimal physiological conditions maintained** |
+| **Total ISE (Tracking Error)** | $1.53 \times 10^8$ ($153{,}450{,}389.23$) | $8.04 \times 10^8$ ($804{,}423{,}682.63$) | **$1.57 \times 10^7$ ($15{,}705{,}244.13$)** | **LQR-I achieves 89.7% error variance reduction** |
+| **Total IAE** | $50{,}307.27$ | $118{,}518.36$ | **$5{,}460.85$** | **LQR-I maintains tightest physical tracking** |
+| **Total Actuator Variation (TV)** | $2{,}090.93$ | **$277.93$** | $947.73$ | **PP has smoothest action; LQR-I modulates dynamically without saturation lock** |
+| **Mean Crop Condition Index (CCI)** | $99.51\%$ | $98.51\%$ | **$99.37\%$** | **Optimal physiological conditions maintained** |
+| **Moisture Tracking Error (% setpoint)** | $8.33\%$ | **$6.62\%$** | $7.29\%$ | Bounded well within biological safety envelope |
+| **Temperature Tracking Error (% setpoint)** | $6.53\%$ | $4.85\%$ | **$1.67\%$** | **LQR-I regulates temperature to ±0.4°C** |
+| **Humidity Tracking Error (% setpoint)** | $6.29\%$ | $5.29\%$ | **$4.61\%$** | **LQR-I coordinates misting and fan ventilation** |
+| **Illumination Tracking Error (% setpoint)** | $11.19\%$ | $26.00\%$ | **$1.54\%$** | **LQR-I eliminates static lux offset** |
+| **Simulink vs. main.m Error** | $7.3 \times 10^{-12}$ | $3.6 \times 10^{-12}$ | $3.6 \times 10^{-12}$ | **Exact numerical agreement down to floating-point round-off** |
 | **Steady-State Error ($e_{ss}$)** | Small residual | Non-zero offset | **Zero ($0.00$)** | **LQR-I integral action guarantees zero offset** |
-| **Max Feedback Gain ($|K_{\max}|$)** | $0.200$ | $0.2167$ | $1.6540$ | **All gains safely bounded within $[0, 2]$** |
+| **Max Feedback Gain ($|K_{\max}|$)** | $0.200$ | $0.2167$ | $1.5712$ | **All gains safely bounded** |
 | **Linear vs Nonlinear Discrepancy** | $< 10^{-9}\%$ | $< 10^{-9}\%$ | $< 10^{-9}\%$ | **Jacobian linearization verified** |
 
 ---
@@ -772,45 +786,75 @@ We computed its real Schur form using `schur` and ordered the stable left-half-p
 
 ---
 
-### Q12: "What is your scope and deliverable status for this Mid-Semester review?"
-**Answer:** "Phase 1 is **$100\%$ accomplished**. We have delivered the dynamic mathematical modeling, soil physics engine, simulated ESP32 sensor layer, analytical trim solver, Jacobian linearization, dual observability analysis, tri-hybrid controller synthesis, anti-windup clamping, safety interlocks, and 5 publication-grade real-time dashboards in a single self-contained script (`main.m`). Phase 2 focuses on physical ESP32 hardware assembly, PCB driver fabrication, and Hardware-in-the-Loop telemetry."
+### Q12: "What is your scope and deliverable status for this End-Semester submission?"
+**Answer:** "All three project layers are **$100\%$ complete**. The **primary entry point** is `build_tomato_simulink_main.m` — running it in MATLAB (with Simulink) builds the full 7-subsystem Simulink block diagram, executes all three controllers, cross-validates sample-for-sample against `main.m`, and saves `simulink_main_results.mat`. `main.m` is retained as the **pure-MATLAB reference baseline** for toolbox-free environments. Layer 3 (`wokwi sim/`) deploys all controller logic onto an ESP32 firmware running the same plant equations in C++, simulated in Wokwi with a full 23-component circuit, OLED dashboard, and serial CSV telemetry."
 
 ---
 
-# PART 6: SUMMARY OF PROJECT STATUS & THREE-PHASE ROADMAP
+### Q13: "How does the Wokwi/ESP32 firmware align with the MATLAB simulation?"
+**Answer:** "`tomato_core.h` is a platform-independent C++ header that encodes all the same numerical values as `main.m` and `build_tomato_simulink_main.m`: the identical gain matrices $K_p, K_i, K_d$ for PID; the same $4 \times 11$ Pole Placement matrix $K_{PP}$; the same $4 \times 11$ LQR state gain $K_x$ and $4 \times 4$ integral gain $K_z$; the same trim point $u_0, x_0$; the same soil constants; and the same FAO/UC Davis growth-stage setpoints. The firmware's forward-Euler plant step function (`plantStep`) is a direct C++ translation of `Tomato_Dynamics()` in `main.m`. The result is sample-for-sample agreement between the MATLAB and ESP32 simulations within single-precision floating-point rounding."
+
+---
+
+### Q14: "Describe the two operating modes of the firmware."
+**Answer:** "**SIM mode**: The ESP32 runs the full nonlinear 11-state plant model in software. Each loop tick (`LOOP_MS = 50 ms`) advances the simulation by $T_s = 0.01$ h, compressing 24 simulated hours into 120 real seconds. Sensor readings come from Gaussian noise injected on top of the model state vector. This mode is identical to the MATLAB closed-loop simulation.  
+**HW mode**: All 11 state values come from live Wokwi hardware: the DHT22 reads temperature and humidity; the photoresistor converts to lux; eight potentiometers substitute for the specialized sensors (soil moisture, pH, EC, tank level, VOC, N, P, K) that have no Wokwi equivalent part. The controller reacts in real time to potentiometer adjustments. Pressing the MODE button (GPIO 18) toggles between modes and resets the simulation."
+
+---
+
+### Q15: "What signals are shown on the OLED display?"
+**Answer:** "The 128×64 SSD1306 OLED is updated every 250 ms and shows 8 rows of live data:
+1. Mode (SIM/HW), controller name (PID/PP/LQRI), simulated time, and growth stage
+2. Soil moisture (measured → setpoint) and temperature (measured → setpoint)
+3. Relative humidity (measured → setpoint) and illumination
+4. pH, EC, and water tank level
+5. N, P, K, and VOC readings
+6. Actuator duty cycles: Pump, Fan, Mist, Light (in %)
+7. Crop Condition Index components: Environmental, Soil, Nutrient
+8. Total CCI score with LOW-WATER and HIGH-VOC alarm flags"
+
+---
+
+### Q16: "How does the Simulink model maintain exact agreement with main.m?"
+**Answer:** "The Simulink model is built entirely from MATLAB Function blocks (not Simulink built-ins like PID Controller). Each MATLAB Function block contains code generated directly from the same `main.m` design routines — the gain matrices are printed at full 17-digit `mat2str` precision. The plant uses a Unit Delay block (not a continuous integrator) to implement the same forward-Euler discrete step $x(k+1) = x(k) + f(x(k), u(k), d(k)) \cdot T_s$ as `main.m`. The random number seed `rng(42)` is replicated by pre-generating the noise sequences in MATLAB workspace and feeding them into the Simulink model via `From Workspace` blocks, ensuring identical noise realizations and thus sample-for-sample numerical agreement."
+
+---
+
+# PART 6: FINAL PROJECT STATUS — THREE-LAYER COMPLETION
 
 ```mermaid
 graph TD
-    subgraph "Phase 1: Mathematical Modeling & Pure MATLAB Simulation (100% Complete)"
+    subgraph "Layer 1 — MATLAB Simulation (100% Complete)"
         A1["11-State Dynamic Modeling<br/>(FAO-56, UC Davis, WUR)"] --> A2["Soil-Type Physics Engine<br/>(Sandy, Loamy, Clay)"]
         A2 --> A3["Simulated ESP32 Sensor Layer<br/>(Transducer Noise & ADC Limits)"]
-        A3 --> A4["Equilibrium Operating Trim<br/>(||dx0||_inf = 1.25e-10)"]
-        A4 --> A5["Unbiased Jacobian Linearization<br/>(A, B, C, D Matrices)"]
-        A5 --> A6["Dual Observability Analysis<br/>(4 Sensors: 4/11 vs 11 Sensors: 11/11)"]
-        A6 --> A7["Tri-Hybrid Control Synthesis<br/>(Decentralized PID, PP, LQR-I)"]
-        A7 --> A8["Safety Interlocks & Anti-Windup<br/>(Pump Cavitation Cutoff)"]
-        A8 --> A9["Normalized 24-Hr Benchmark &<br/>5 Real-Time Dashboards (main.m)"]
+        A3 --> A4["Equilibrium Trim<br/>(residual = 1.25e-10)"]
+        A4 --> A5["Jacobian Linearization<br/>(A, B, C, D)"]
+        A5 --> A6["Dual Observability<br/>(4 → 4/11 vs 11 → 11/11)"]
+        A6 --> A7["Tri-Hybrid Synthesis<br/>(PID · PP · LQR-I)"]
+        A7 --> A8["Safety Interlocks<br/>Anti-Windup · Water Cutoff"]
+        A8 --> A9["24-h Benchmark<br/>8 Dashboards · main.m"]
     end
 
-    subgraph "Phase 2: Embedded Hardware Prototyping (Upcoming)"
-        B1["ESP32-S3 / STM32 Hardware Architecture"] --> B2["Multi-Sensor Wiring & Interfacing<br/>(BME280, Capacitive, RS485 NPK)"]
-        B2 --> B3["MOSFET & Relay Actuator Driver Circuits<br/>(Pumps, Fans, Atomizers, LEDs)"]
-        B3 --> B4["Hardware-in-the-Loop (HIL)<br/>Real-Time Serial Telemetry"]
+    subgraph "Layer 2 — Simulink Twin (100% Complete)"
+        B1["build_tomato_simulink_main.m<br/>7-Subsystem Block Builder"] --> B2["Tomato_Crop_Control_Main.slx<br/>Fixed-Step Discrete Solver"]
+        B2 --> B3["Cross-Validation<br/>vs main.m (< 1e-6 deviation)"]
+        B3 --> B4["simulink_main_results.mat<br/>Validation Report PDF"]
     end
 
-    subgraph "Phase 3: Edge AI, Cloud IoT & Crop Trials (Final Phase)"
-        C1["Extended Kalman Filter (EKF)<br/>Biomass & Stress State Observer"] --> C2["Nonlinear MPC (NMPC)<br/>Weather Forecast Pre-Cooling"]
-        C2 --> C3["AWS IoT / ThingsBoard<br/>Cloud Telemetry & Mobile App"]
-        C3 --> C4["30-Day Biological Tomato Trial<br/>& Final Thesis Defense"]
+    subgraph "Layer 3 — Wokwi/ESP32 Firmware (100% Complete)"
+        C1["tomato_core.h<br/>C++ Plant + Controllers Header"] --> C2["sketch.ino<br/>SIM & HW Modes · OLED · Serial"]
+        C2 --> C3["diagram.json<br/>23-Component Circuit"]
+        C3 --> C4["libraries.txt<br/>DHT · Adafruit GFX · SSD1306"]
     end
 
-    A9 ==> B1
-    B4 ==> C1
+    A9 ==>|"Gains & equations exported to"| B1
+    A9 ==>|"Gains & equations embedded in"| C1
+    B3 -.->|"Sample-for-sample verified"| C2
 ```
 
 ---
 
-### Formal Phase Milestones Summary:
-- **Phase 1 (100% Accomplished)**: Complete mathematical foundation, single-file orchestration (`main.m`), zero-toolbox compliance, tri-hybrid controller benchmarking, simulated sensor noise, soil physics, safety interlocks, and quantitative scorecard.
-- **Phase 2 (Upcoming - Embedded Hardware Prototyping)**: ESP32-S3 microcontroller deployment, discrete C++ control loop implementation ($T_s = 1.0\text{ s}$), sensor calibration bench, power driver PCB assembly, and UART HIL telemetry.
-- **Phase 3 (Final Phase - Edge AI, Cloud IoT & Crop Trials)**: Extended Kalman Filter state observer, cloud MQTT integration (ThingsBoard/AWS), and a 30-day comparative biological tomato crop growth trial.
+### Formal Completion Summary:
+- **Layer 1 — `main.m` (100% Complete)**: Complete mathematical foundation — zero-toolbox Hamiltonian Schur CARE, Sylvester pole placement, Kalman staircase, 11-state plant, tri-hybrid controllers, 8 publication-grade dashboards.
+- **Layer 2 — `build_tomato_simulink_main.m` / `.slx` (100% Complete)**: Full 7-subsystem Simulink block diagram twin built programmatically; sample-for-sample cross-validated against `main.m` with max deviation $< 10^{-6}$.
+- **Layer 3 — `wokwi sim/` ESP32 Firmware (100% Complete)**: Platform-independent `tomato_core.h` with all controller gains and plant dynamics in C++; `sketch.ino` with SIM/HW dual modes, OLED live dashboard, 25-field CSV serial telemetry, safety LEDs; full Wokwi circuit with DHT22, LDR, 8× potentiometers, SSD1306, 6× LEDs, 2× buttons.
