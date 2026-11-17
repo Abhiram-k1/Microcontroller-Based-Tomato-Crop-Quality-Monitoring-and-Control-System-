@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>System Architecture - 11-State Autonomous Tomato Greenhouse Control System</title>
+<style>
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    width: 1920px;
+    height: 1080px;
+    background: radial-gradient(circle at 50% 12%, #ffffff 0%, #f4faf6 50%, #e8f5ec 100%);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #1e293b;
+    padding: 18px 40px 14px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Decorative Leaf Corner Graphics */
+  .leaf-deco {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.9;
+  }
+  .leaf-top-left {
+    top: 8px;
+    left: 12px;
+    width: 140px;
+    height: 105px;
+  }
+  .leaf-top-right {
+    top: 8px;
+    right: 12px;
+    width: 140px;
+    height: 105px;
+    transform: scaleX(-1);
+  }
+  .leaf-bottom-left {
+    bottom: 8px;
+    left: 12px;
+    width: 120px;
+    height: 90px;
+    transform: scaleY(-1);
+  }
+  .leaf-bottom-right {
+    bottom: 8px;
+    right: 12px;
+    width: 120px;
+    height: 90px;
+    transform: scale(-1, -1);
+  }
+
+  /* Header Section */
+  .header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  .title-pill {
+    background: linear-gradient(135deg, #164e28 0%, #2e7d32 100%);
+    color: #ffffff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 29pt;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    padding: 7px 48px;
+    border-radius: 40px;
+    box-shadow: 0 5px 16px rgba(22, 78, 40, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .title-pill svg {
+    width: 32px;
+    height: 32px;
+    fill: #a5d6a7;
+  }
+  .subtitle-pill {
+    margin-top: 5px;
+    background: #ffffff;
+    border: 1.5px solid #81c784;
+    color: #1b5e20;
+    font-size: 11pt;
+    font-weight: 700;
+    font-style: italic;
+    padding: 4px 28px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(46, 125, 50, 0.1);
+    letter-spacing: 0.3px;
+  }
+
+  /* Main Upper Flow Layout */
+  .upper-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    height: 485px;
+  }
+
+  /* Card Container */
+  .flow-card {
+    background: #ffffff;
+    border: 2px solid #81c784;
+    border-radius: 18px;
+    padding: 12px 13px 10px 13px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.08);
+    position: relative;
+  }
+  .card-header-pill {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 6px 12px;
+    border-radius: 14px;
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(27, 94, 32, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Arrow Connectors */
+  .flow-arrow {
+    width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .flow-arrow svg {
+    width: 28px;
+    height: 28px;
+    fill: #2e7d32;
+    filter: drop-shadow(0 2px 3px rgba(46, 125, 50, 0.35));
+  }
+
+  /* Box 1: Input Parameters */
+  .param-group {
+    background: #f4fbf6;
+    border: 1px solid #c8e6c9;
+    border-radius: 10px;
+    padding: 7px 9px;
+    margin-bottom: 7px;
+  }
+  .param-group:last-child {
+    margin-bottom: 0;
+  }
+  .group-title {
+    font-size: 8.3pt;
+    font-weight: 700;
+    color: #1b5e20;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed #a5d6a7;
+    padding-bottom: 2px;
+  }
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9.1pt;
+    font-weight: 600;
+    color: #263238;
+    margin-bottom: 4px;
+  }
+  .item-row:last-child {
+    margin-bottom: 0;
+  }
+  .item-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .item-val {
+    margin-left: auto;
+    font-size: 7.8pt;
+    font-weight: 700;
+    color: #0369a1;
+    background: #e0f2fe;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* Box 2: Nonlinear Greenhouse Model */
+  .greenhouse-vis {
+    background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+    border: 1px solid #a5d6a7;
+    border-radius: 12px;
+    padding: 8px 10px;
+    text-align: center;
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .greenhouse-svg {
+    width: 100%;
+    height: 135px;
+  }
+  .gh-caption {
+    font-size: 8.8pt;
+    font-weight: 700;
+    color: #1b5e20;
+    margin-top: 3px;
+  }
+  .physics-specs {
+    background: #ffffff;
+    border: 1px solid #dcedc8;
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 8.1pt;
+    color: #374151;
+    line-height: 1.35;
+  }
+  .physics-specs strong {
+    color: #1b5e20;
+  }
+
+  /* Box 3: Control Strategies */
+  .ctrl-card {
+    background: #f1f8e9;
+    border: 1.5px solid #aed581;
+    border-radius: 12px;
+    padding: 9px 11px;
+    margin-bottom: 9px;
+  }
+  .ctrl-card:last-child {
+    margin-bottom: 0;
+  }
+  .ctrl-card.featured {
+    background: #e8f5e9;
+    border: 2px solid #43a047;
+    box-shadow: 0 3px 8px rgba(67, 160, 71, 0.18);
+  }
+  .ctrl-title {
+    font-size: 9.8pt;
+    font-weight: 700;
+    color: #1b5e20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
+  }
+  .ctrl-desc {
+    font-size: 8.1pt;
+    color: #4b5563;
+    line-height: 1.25;
+  }
+  .ctrl-badge {
+    font-size: 7.2pt;
+    font-weight: 700;
+    padding: 1.5px 6px;
+    border-radius: 4px;
+  }
+  .badge-lqr {
+    background: #16a34a;
+    color: #ffffff;
+  }
+  .badge-std {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  /* Box 4: Actuator Control */
+  .actuator-item {
+    background: #f9fbf9;
+    border: 1px solid #c8e6c9;
+    border-radius: 10px;
+    padding: 7px 9px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .actuator-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .act-info h4 {
+    font-size: 8.9pt;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .act-info p {
+    font-size: 7.6pt;
+    color: #64748b;
+  }
+  .act-pwm {
+    margin-left: auto;
+    font-size: 7.6pt;
+    font-weight: 700;
+    color: #15803d;
+    background: #dcfce7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .interlock-badge {
+    background: #fffbeb;
+    border: 1px dashed #f59e0b;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 7.6pt;
+    font-weight: 600;
+    color: #b45309;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+  }
+
+  /* Box 5: Outputs */
+  .output-box {
+    background: #f4fbf6;
+    border: 1px solid #c8e6c9;
+    border-radius: 10px;
+    padding: 9px 11px;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .output-icon-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .out-info h4 {
+    font-size: 9.1pt;
+    font-weight: 700;
+    color: #1b5e20;
+  }
+  .out-info p {
+    font-size: 7.8pt;
+    color: #4b5563;
+  }
+
+  /* Lower Section: Continuous Monitoring & Performance Evaluation */
+  .lower-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+    height: 320px;
+  }
+
+  /* Card 7: Continuous Monitoring (Left) */
+  .monitor-card {
+    width: 580px;
+    background: #ffffff;
+    border: 2px solid #81c784;
+    border-radius: 18px;
+    padding: 12px 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.08);
+  }
+  .monitor-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+  .monitor-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .monitor-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e0f2fe;
+    border: 1.5px solid #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .monitor-text h5 {
+    font-size: 9.2pt;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .monitor-text p {
+    font-size: 7.9pt;
+    color: #64748b;
+  }
+
+  /* Arrow between Lower Cards */
+  .lower-arrow {
+    width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lower-arrow svg {
+    width: 30px;
+    height: 30px;
+    fill: #2e7d32;
+    transform: scaleX(-1);
+    filter: drop-shadow(0 2px 3px rgba(46, 125, 50, 0.35));
+  }
+
+  /* Card 6: Performance Evaluation (Right) */
+  .eval-card {
+    width: 1170px;
+    background: #ffffff;
+    border: 2px solid #81c784;
+    border-radius: 18px;
+    padding: 12px 18px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.08);
+  }
+  .eval-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 560px 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+  .chart-container {
+    background: #fafdfb;
+    border: 1px solid #c8e6c9;
+    border-radius: 12px;
+    padding: 8px 12px;
+    height: 235px;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-title {
+    font-size: 8.6pt;
+    font-weight: 700;
+    color: #1b5e20;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .step-svg {
+    width: 100%;
+    height: 195px;
+  }
+  .metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .metric-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 8.8pt;
+    color: #1e293b;
+    background: #f4fbf6;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #c8e6c9;
+  }
+  .check-icon {
+    width: 17px;
+    height: 17px;
+    background: #16a34a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+  .metric-val {
+    margin-left: auto;
+    font-size: 8.1pt;
+    font-weight: 700;
+    color: #15803d;
+  }
+
+  /* Global Feedback Vectors */
+  .feedback-loop-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Bottom Banner */
+  .bottom-banner {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+  .bottom-pill {
+    background: #e8f5e9;
+    border: 1.5px solid #81c784;
+    color: #1b5e20;
+    font-size: 10.8pt;
+    font-weight: 700;
+    font-style: italic;
+    padding: 5px 36px;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Decorative Corner Leaves -->
+  <svg class="leaf-deco leaf-top-left" viewBox="0 0 140 105">
+    <path d="M10,85 Q45,20 120,10 Q65,65 10,85 Z" fill="#2e7d32" opacity="0.9"/>
+    <path d="M10,85 Q75,55 120,10" stroke="#a5d6a7" stroke-width="2" fill="none"/>
+    <path d="M5,100 Q55,65 95,55 Q50,90 5,100 Z" fill="#388e3c" opacity="0.8"/>
+    <path d="M25,65 Q65,40 80,18 Q55,50 25,65 Z" fill="#66bb6a" opacity="0.85"/>
+  </svg>
+  <svg class="leaf-deco leaf-top-right" viewBox="0 0 140 105">
+    <path d="M10,85 Q45,20 120,10 Q65,65 10,85 Z" fill="#2e7d32" opacity="0.9"/>
+    <path d="M10,85 Q75,55 120,10" stroke="#a5d6a7" stroke-width="2" fill="none"/>
+    <path d="M5,100 Q55,65 95,55 Q50,90 5,100 Z" fill="#388e3c" opacity="0.8"/>
+  </svg>
+  <svg class="leaf-deco leaf-bottom-left" viewBox="0 0 120 90">
+    <path d="M10,75 Q38,15 105,10 Q55,55 10,75 Z" fill="#2e7d32" opacity="0.9"/>
+    <path d="M10,75 Q65,45 105,10" stroke="#a5d6a7" stroke-width="1.8" fill="none"/>
+  </svg>
+  <svg class="leaf-deco leaf-bottom-right" viewBox="0 0 120 90">
+    <path d="M10,75 Q38,15 105,10 Q55,55 10,75 Z" fill="#2e7d32" opacity="0.9"/>
+    <path d="M10,75 Q65,45 105,10" stroke="#a5d6a7" stroke-width="1.8" fill="none"/>
+  </svg>
+
+  <!-- SVG Global Feedback Paths -->
+  <svg class="feedback-loop-svg">
+    <!-- Path 1: From Outputs Card bottom (x=1705, y=575) down to y=625, right to x=1890, down to y=755, and left into Performance Evaluation (x=1875) -->
+    <path d="M 1705 575 L 1705 625 L 1890 625 L 1890 755 L 1875 755" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="6,4" stroke-linecap="round"/>
+    <polygon points="1878,750 1868,755 1878,760" fill="#2e7d32"/>
+
+    <!-- Path 2: From Nonlinear Model bottom (x=572, y=575) down into Monitoring / Feedback (x=572, y=695) -->
+    <path d="M 572 575 L 572 690" fill="none" stroke="#689f38" stroke-width="2" stroke-dasharray="5,4" stroke-linecap="round"/>
+    <polygon points="568,686 572,695 576,686" fill="#689f38"/>
+
+    <!-- Path 3: From Continuous Monitoring (top center: x=212, y=695) straight UP into Input Parameters (bottom center: x=212, y=580) -->
+    <path d="M 212 695 L 212 585" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="6,4" stroke-linecap="round"/>
+    <polygon points="207,589 212,577 217,589" fill="#2e7d32"/>
+  </svg>
+
+  <!-- Top Header Section -->
+  <div class="header-container">
+    <div class="title-pill">
+      <svg viewBox="0 0 24 24"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/></svg>
+      System Architecture
+      <svg viewBox="0 0 24 24" style="transform: scaleX(-1);"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/></svg>
+    </div>
+    <div class="subtitle-pill">
+      11-State Autonomous Multivariable Tomato Greenhouse Control System
+    </div>
+  </div>
+
+  <!-- Upper Pipeline (5 Flow Cards) -->
+  <div class="upper-flow">
+
+    <!-- Card 1: Input Parameters -->
+    <div class="flow-card" style="width: 305px;">
+      <div class="card-header-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+          <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+        </svg>
+        Input Parameters
+      </div>
+      <div class="card-content">
+        <!-- Climate States -->
+        <div class="param-group">
+          <div class="group-title">Primary Climate States (y &isin; &#8477;<sup>4</sup>)</div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#ef4444"><path d="M12 2a4 4 0 0 0-4 4v7.26a6 6 0 1 0 8 0V6a4 4 0 0 0-4-4zm2 13.53V15a2 2 0 1 1-4 0v-.47a4.01 4.01 0 0 1-1.37-2.03h2.37V9h-2V7h2V6a1 1 0 1 1 2 0v1h2v2h-2v3.5h2.37A4.01 4.01 0 0 1 14 15.53z"/></svg>
+            </span>
+            <span>Temperature (T)</span>
+            <span class="item-val">21 &ndash; 26 &deg;C</span>
+          </div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            </span>
+            <span>Humidity (H)</span>
+            <span class="item-val">60 &ndash; 70 %</span>
+          </div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#16a34a"><path d="M12 2C8 6 6 10 6 14a6 6 0 0 0 12 0c0-4-2-8-6-12zm-1 16.93a4.01 4.01 0 0 1-3-3.93c0-1.88 1.08-3.75 3-5.5v9.43z"/></svg>
+            </span>
+            <span>Soil Moisture (M)</span>
+            <span class="item-val">60 &ndash; 70 %</span>
+          </div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#eab308"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#eab308" stroke-width="2.5"/></svg>
+            </span>
+            <span>Light Intensity (L)</span>
+            <span class="item-val">15 &ndash; 25 klx</span>
+          </div>
+        </div>
+
+        <!-- Soil & Biochemical States -->
+        <div class="param-group">
+          <div class="group-title">Soil &amp; Biochemical States (7 States)</div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#8b5cf6"><path d="M19 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2zM9 5v4h6V5H9z"/></svg>
+            </span>
+            <span>Soil pH Level</span>
+            <span class="item-val">6.0 &ndash; 6.8</span>
+          </div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#0d9488"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </span>
+            <span>EC Conductivity</span>
+            <span class="item-val">2.0 mS/cm</span>
+          </div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#10b981"><path d="M12 2a5 5 0 0 0-5 5c0 2.12 1.31 3.93 3.17 4.65L9 22h6l-1.17-10.35A5.002 5.002 0 0 0 17 7a5 5 0 0 0-5-5z"/></svg>
+            </span>
+            <span>Macronutrients (N,P,K)</span>
+            <span class="item-val">Dynamic Uptake</span>
+          </div>
+          <div class="item-row">
+            <span class="item-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#0284c7"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 14H7v-4h10v4z"/></svg>
+            </span>
+            <span>Water Reservoir (W)</span>
+            <span class="item-val">&gt; 10 % Cutoff</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 1 -> 2 -->
+    <div class="flow-arrow">
+      <svg viewBox="0 0 24 24"><polygon points="6,4 18,12 6,20"/></svg>
+    </div>
+
+    <!-- Card 2: Nonlinear Greenhouse Model -->
+    <div class="flow-card" style="width: 345px;">
+      <div class="card-header-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Nonlinear Greenhouse Model
+      </div>
+      <div class="card-content">
+        <div class="greenhouse-vis">
+          <!-- Stylized SVG Greenhouse Graphic -->
+          <svg class="greenhouse-svg" viewBox="0 0 310 135">
+            <!-- Sky & Sun -->
+            <circle cx="265" cy="26" r="16" fill="#fde047" opacity="0.95"/>
+            <path d="M265,5 L265,0 M265,47 L265,52 M244,26 L239,26 M286,26 L291,26" stroke="#facc15" stroke-width="2.2"/>
+            <path d="M250,11 L246,7 M280,41 L284,45 M250,41 L246,45 M280,11 L284,7" stroke="#facc15" stroke-width="1.8"/>
+
+            <!-- Ground / Soil Bed -->
+            <rect x="0" y="105" width="310" height="30" fill="#8d6e63" rx="4"/>
+            <rect x="0" y="113" width="310" height="22" fill="#6d4c41"/>
+
+            <!-- Greenhouse Glass Frame Structure -->
+            <polygon points="35,105 35,55 155,18 275,55 275,105" fill="#e0f2fe" opacity="0.75" stroke="#334155" stroke-width="2.5"/>
+            <!-- Roof Rafters & Glass Panes -->
+            <line x1="155" y1="18" x2="155" y2="105" stroke="#64748b" stroke-width="1.8"/>
+            <line x1="95" y1="36.5" x2="95" y2="105" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="215" y1="36.5" x2="215" y2="105" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="35" y1="55" x2="275" y2="55" stroke="#64748b" stroke-width="1.5"/>
+
+            <!-- Plant 1 (Left) -->
+            <path d="M75,105 Q78,85 80,75" stroke="#15803d" stroke-width="3" fill="none"/>
+            <circle cx="73" cy="80" r="5" fill="#22c55e"/>
+            <circle cx="85" cy="74" r="5" fill="#22c55e"/>
+            <circle cx="78" cy="88" r="4.5" fill="#dc2626"/>
+
+            <!-- Plant 2 (Center - High Vigor) -->
+            <path d="M155,105 Q153,80 155,66" stroke="#15803d" stroke-width="3.5" fill="none"/>
+            <circle cx="147" cy="74" r="6" fill="#16a34a"/>
+            <circle cx="163" cy="70" r="6" fill="#16a34a"/>
+            <circle cx="153" cy="60" r="5.5" fill="#22c55e"/>
+            <circle cx="149" cy="84" r="5" fill="#dc2626"/>
+            <circle cx="160" cy="86" r="5" fill="#dc2626"/>
+
+            <!-- Plant 3 (Right) -->
+            <path d="M235,105 Q232,85 230,75" stroke="#15803d" stroke-width="3" fill="none"/>
+            <circle cx="225" cy="78" r="5" fill="#22c55e"/>
+            <circle cx="237" cy="72" r="5" fill="#22c55e"/>
+            <circle cx="232" cy="88" r="4.5" fill="#dc2626"/>
+          </svg>
+          <div class="gh-caption">Models the dynamics of greenhouse environment</div>
+        </div>
+
+        <div class="physics-specs">
+          <strong>11-State Coupled Dynamic Plant:</strong>
+          <br>&bull; Coupled thermal convection &amp; vapor mass balance
+          <br>&bull; Dynamic Penman-Monteith crop transpiration rate
+          <br>&bull; 3 Substrate classes (Sandy, Loamy, Clay kinetics)
+          <br>&bull; 24h Diurnal disturbance (ambient temp &amp; solar flux)
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 2 -> 3 -->
+    <div class="flow-arrow">
+      <svg viewBox="0 0 24 24"><polygon points="6,4 18,12 6,20"/></svg>
+    </div>
+
+    <!-- Card 3: Control Strategies -->
+    <div class="flow-card" style="width: 355px;">
+      <div class="card-header-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+        Control Strategies
+      </div>
+      <div class="card-content">
+        <!-- Controller 1: Decentralized PID -->
+        <div class="ctrl-card">
+          <div class="ctrl-title">
+            <span>Decentralized PID</span>
+            <span class="ctrl-badge badge-std">4 SISO Loops</span>
+          </div>
+          <div class="ctrl-desc">
+            Single-input single-output control with anti-windup clamping. Susceptible to thermodynamic cross-coupling.
+          </div>
+        </div>
+
+        <!-- Controller 2: Pole Placement -->
+        <div class="ctrl-card">
+          <div class="ctrl-title">
+            <span>Pole Placement</span>
+            <span class="ctrl-badge badge-std">Sylvester Solver</span>
+          </div>
+          <div class="ctrl-desc">
+            Scaled Subspace state feedback placing environmental poles at &lambda; = {&minus;0.6, &minus;0.8, &minus;1.0, &minus;1.2} h<sup>&minus;1</sup> with bounded gains (|K| &le; 0.2167).
+          </div>
+        </div>
+
+        <!-- Controller 3: LQR Integral (Featured) -->
+        <div class="ctrl-card featured">
+          <div class="ctrl-title">
+            <span>LQR Integral (LQR-I)</span>
+            <span class="ctrl-badge badge-lqr">Optimal Multivariable</span>
+          </div>
+          <div class="ctrl-desc">
+            Augmented 15-state space with CARE Schur solver. Coordinates all 4 actuators simultaneously to eliminate steady-state bias and reject disturbances.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 3 -> 4 -->
+    <div class="flow-arrow">
+      <svg viewBox="0 0 24 24"><polygon points="6,4 18,12 6,20"/></svg>
+    </div>
+
+    <!-- Card 4: Actuator Control -->
+    <div class="flow-card" style="width: 345px;">
+      <div class="card-header-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Actuator Control
+      </div>
+      <div class="card-content">
+        <!-- Fan -->
+        <div class="actuator-item">
+          <div class="actuator-icon-box" style="color: #0284c7;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 12c0-3 2.5-5 5-5s2 2.5 0 5-5 0-5 0z"/><path d="M12 12c3 0 5 2.5 5 5s-2.5 2-5 0 0-5 0-5z"/><path d="M12 12c0 3-2.5 5-5 5s-2-2.5 0-5 5 0 5 0z"/><path d="M12 12c-3 0-5-2.5-5-5s2.5-2 5 0 0 5 0 5z"/></svg>
+          </div>
+          <div class="act-info">
+            <h4>Ventilation Fan</h4>
+            <p>Thermal cooling &amp; dehumidification</p>
+          </div>
+          <div class="act-pwm">0 &ndash; 100%</div>
+        </div>
+
+        <!-- Heater / Mist Unit -->
+        <div class="actuator-item">
+          <div class="actuator-icon-box" style="color: #ef4444;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          </div>
+          <div class="act-info">
+            <h4>Heating &amp; Mist Unit</h4>
+            <p>Chamber heating &amp; evaporative fog</p>
+          </div>
+          <div class="act-pwm">0 &ndash; 100%</div>
+        </div>
+
+        <!-- Irrigation System -->
+        <div class="actuator-item">
+          <div class="actuator-icon-box" style="color: #10b981;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          </div>
+          <div class="act-info">
+            <h4>Irrigation System</h4>
+            <p>Substrate drip irrigation pump</p>
+          </div>
+          <div class="act-pwm">0 &ndash; 100%</div>
+        </div>
+
+        <!-- Grow Lights -->
+        <div class="actuator-item">
+          <div class="actuator-icon-box" style="color: #f59e0b;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18h6M10 22h4M12 2v1M12 8a4 4 0 0 0-4 4c0 1.5 1 2.5 1.5 3.5h5c.5-1 1.5-2 1.5-3.5a4 4 0 0 0-4-4z"/></svg>
+          </div>
+          <div class="act-info">
+            <h4>LED Grow Lights</h4>
+            <p>Photosynthetic PAR irradiance</p>
+          </div>
+          <div class="act-pwm">0 &ndash; 100%</div>
+        </div>
+
+        <!-- Safety Interlock -->
+        <div class="interlock-badge">
+          <span>&#9888;</span>
+          <span>Safety: Reservoir low-water cutoff (W &lt; 10%) &amp; [0, 1] clamp</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 4 -> 5 -->
+    <div class="flow-arrow">
+      <svg viewBox="0 0 24 24"><polygon points="6,4 18,12 6,20"/></svg>
+    </div>
+
+    <!-- Card 5: Outputs -->
+    <div class="flow-card" style="width: 310px;">
+      <div class="card-header-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Outputs
+      </div>
+      <div class="card-content">
+        <!-- Output 1 -->
+        <div class="output-box">
+          <div class="output-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M12 2a4 4 0 0 0-4 4v7.26a6 6 0 1 0 8 0V6a4 4 0 0 0-4-4zm0 15a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
+          </div>
+          <div class="out-info">
+            <h4>Optimal Temperature</h4>
+            <p>21 &ndash; 26 &deg;C tightly maintained without chilling stress</p>
+          </div>
+        </div>
+
+        <!-- Output 2 -->
+        <div class="output-box">
+          <div class="output-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          </div>
+          <div class="out-info">
+            <h4>Ideal Humidity &amp; Soil</h4>
+            <p>65% RH &amp; 60% soil moisture preventing pathogen spread</p>
+          </div>
+        </div>
+
+        <!-- Output 3 -->
+        <div class="output-box">
+          <div class="output-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#16a34a"><path d="M12 2C8 6 6 10 6 14a6 6 0 0 0 12 0c0-4-2-8-6-12z"/></svg>
+          </div>
+          <div class="out-info">
+            <h4>Healthy Crop Growth</h4>
+            <p>Optimal stomatal conductance &amp; accelerated biomass yield</p>
+          </div>
+        </div>
+
+        <!-- Output 4 -->
+        <div class="output-box" style="margin-bottom: 0;">
+          <div class="output-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#f59e0b"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="out-info">
+            <h4>Resource Efficiency</h4>
+            <p>Smooth actuator control minimizing wear and energy use</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Lower Section: Continuous Monitoring (Left) & Performance Evaluation (Right) -->
+  <div class="lower-flow">
+
+    <!-- Card 7: Continuous Monitoring & Optimization (Left - positioned under Input Parameters) -->
+    <div class="monitor-card">
+      <div class="card-header-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Continuous Monitoring &amp; Optimization
+      </div>
+      <div class="monitor-body">
+        <div class="monitor-item">
+          <div class="monitor-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+          </div>
+          <div class="monitor-text">
+            <h5>Full-State Feedback Loop</h5>
+            <p>Closed-loop state vector x(t) &isin; &#8477;<sup>11</sup> feedback with sensor noise filtering</p>
+          </div>
+        </div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon" style="border-color: #10b981; background: #d1fae5;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#059669"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          </div>
+          <div class="monitor-text">
+            <h5>Diurnal Disturbance Rejection</h5>
+            <p>Anticipates solar irradiance and ambient temperature fluctuations in real time</p>
+          </div>
+        </div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon" style="border-color: #8b5cf6; background: #ede9fe;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#7c3aed"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <div class="monitor-text">
+            <h5>Dynamic Growth Scheduling</h5>
+            <p>5-Phase agronomic setpoint modulation from germination to maturity</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow from Right Card to Left Card -->
+    <div class="lower-arrow">
+      <svg viewBox="0 0 24 24"><polygon points="6,4 18,12 6,20"/></svg>
+    </div>
+
+    <!-- Card 6: Performance Evaluation (Right) -->
+    <div class="eval-card">
+      <div class="card-header-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Performance Evaluation &amp; Transient Benchmark
+      </div>
+      <div class="eval-body">
+        <!-- Step Response Curve SVG -->
+        <div class="chart-container">
+          <div class="chart-title">
+            <span>Closed-Loop Step Response Comparison</span>
+            <span style="font-size: 7.6pt; color: #64748b;">
+              <span style="color: #16a34a; font-weight: bold;">&mdash; LQR-I</span> &nbsp;
+              <span style="color: #2563eb; font-weight: bold;">&mdash; Pole Placement</span> &nbsp;
+              <span style="color: #f59e0b; font-weight: bold;">&mdash; PID</span> &nbsp;
+              <span style="color: #64748b; font-style: italic;">-- Setpoint</span>
+            </span>
+          </div>
+          <svg class="step-svg" viewBox="0 0 520 180">
+            <!-- Grid Lines -->
+            <line x1="50" y1="150" x2="500" y2="150" stroke="#cbd5e1" stroke-width="1.2"/>
+            <line x1="50" y1="105" x2="500" y2="105" stroke="#f1f5f9" stroke-width="1"/>
+            <line x1="50" y1="60" x2="500" y2="60" stroke="#e2e8f0" stroke-width="1"/>
+            <line x1="50" y1="20" x2="500" y2="20" stroke="#f1f5f9" stroke-width="1"/>
+            <line x1="50" y1="15" x2="50" y2="150" stroke="#cbd5e1" stroke-width="1.2"/>
+
+            <!-- Axis Labels -->
+            <text x="275" y="170" font-size="9.5" fill="#64748b" text-anchor="middle" font-weight="600">Time (Hours)</text>
+            <text x="18" y="85" font-size="9.5" fill="#64748b" text-anchor="middle" font-weight="600" transform="rotate(-90 18 85)">Response</text>
+            <text x="44" y="153" font-size="8" fill="#94a3b8" text-anchor="end">0.0</text>
+            <text x="44" y="63" font-size="8" fill="#94a3b8" text-anchor="end">1.0</text>
+
+            <!-- Desired Setpoint Line (Dashed) -->
+            <line x1="50" y1="60" x2="500" y2="60" stroke="#64748b" stroke-width="1.6" stroke-dasharray="5,4"/>
+
+            <!-- PID Response (Orange - Significant Overshoot and Oscillation) -->
+            <path d="M50,150 Q85,25 135,42 T215,66 T310,56 T405,62 L500,60" fill="none" stroke="#f59e0b" stroke-width="2.3"/>
+
+            <!-- Pole Placement Response (Blue - Monotonic but slower settling) -->
+            <path d="M50,150 Q120,130 200,80 T340,62 L500,60" fill="none" stroke="#2563eb" stroke-width="2.1"/>
+
+            <!-- LQR-I Response (Green - Fast, Zero Overshoot, Zero SS Error) -->
+            <path d="M50,150 Q90,66 145,60 L500,60" fill="none" stroke="#16a34a" stroke-width="3"/>
+          </svg>
+        </div>
+
+        <!-- Metrics Verification List -->
+        <div class="metrics-list">
+          <div class="metric-item">
+            <span class="check-icon">&#10004;</span>
+            <span><strong>Settling Time:</strong> Rapid convergence to target</span>
+            <span class="metric-val">Fastest (LQR-I)</span>
+          </div>
+          <div class="metric-item">
+            <span class="check-icon">&#10004;</span>
+            <span><strong>Overshoot Suppression:</strong> Zero thermal shock</span>
+            <span class="metric-val">0.0% Overshoot</span>
+          </div>
+          <div class="metric-item">
+            <span class="check-icon">&#10004;</span>
+            <span><strong>Multivariable Stability:</strong> Rejects cross-coupling</span>
+            <span class="metric-val">Lyapunov Stable</span>
+          </div>
+          <div class="metric-item">
+            <span class="check-icon">&#10004;</span>
+            <span><strong>Actuator Chattering:</strong> Smooth TV profile</span>
+            <span class="metric-val">&minus;89.7% Variance</span>
+          </div>
+          <div class="metric-item">
+            <span class="check-icon">&#10004;</span>
+            <span><strong>Crop Condition Index (CCI):</strong> Health score</span>
+            <span class="metric-val">&ge; 90.0% High Vigor</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Banner -->
+  <div class="bottom-banner">
+    <div class="bottom-pill">
+      Smart Control for Healthier and More Productive Tomato Crops &bull; 11-State Multivariable Digital Twin Architecture
+    </div>
+  </div>
+
+</body>
+</html>
