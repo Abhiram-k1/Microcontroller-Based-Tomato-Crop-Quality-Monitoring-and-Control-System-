@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project Timeline and Current Status</title>
+<style>
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    width: 1920px;
+    height: 1080px;
+    background-color: #ffffff;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #1e293b;
+    padding: 20px 28px 16px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-img {
+    height: 52px;
+    object-fit: contain;
+  }
+  .title-group h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 26pt;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+    line-height: 1.1;
+  }
+  .title-group p {
+    font-size: 9.8pt;
+    color: #475569;
+    font-weight: 600;
+    margin-top: 2px;
+    letter-spacing: 0.2px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 8px;
+  }
+  .meta-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 9pt;
+    font-weight: 600;
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+  }
+  .meta-tag.final {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+    font-weight: 700;
+  }
+
+  /* Table styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #94a3b8;
+    background: #ffffff;
+    font-size: 8.6pt;
+    line-height: 1.25;
+  }
+  th {
+    background: #c8dcfa;
+    color: #0f2744;
+    font-weight: 700;
+    text-align: left;
+    padding: 6px 10px;
+    border: 1px solid #94a3b8;
+    font-size: 9.3pt;
+  }
+  th.center, td.center {
+    text-align: center;
+  }
+  td {
+    padding: 4.8px 9px;
+    border: 1px solid #cbd5e1;
+    vertical-align: middle;
+  }
+  tr.row-done {
+    background-color: #f4fbf6;
+  }
+  tr.row-done:nth-child(even) {
+    background-color: #eaf7ee;
+  }
+  .week-col {
+    font-weight: 800;
+    font-size: 9.8pt;
+    color: #0f2744;
+    width: 48px;
+  }
+  .date-col {
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+    width: 108px;
+    font-size: 8.5pt;
+  }
+  .work-col {
+    color: #1e293b;
+  }
+  .work-col strong {
+    color: #0f172a;
+    font-weight: 700;
+  }
+  .deliv-col {
+    color: #334155;
+    font-weight: 500;
+    width: 330px;
+  }
+  .status-col {
+    width: 90px;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 2.5px 8px;
+    background: #16a34a;
+    color: #ffffff;
+    font-size: 7.8pt;
+    font-weight: 700;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+    box-shadow: 0 1px 2px rgba(22, 163, 74, 0.25);
+  }
+  .status-badge svg {
+    width: 11px;
+    height: 11px;
+    stroke: currentColor;
+    stroke-width: 3;
+    fill: none;
+  }
+
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 8.2pt;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Footer */
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1.5px solid #cbd5e1;
+    margin-top: 6px;
+  }
+  .legend-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8.6pt;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+  }
+  .leg-done {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+  }
+  .leg-prog {
+    background: #fef9c3;
+    color: #a16207;
+    border-color: #fde047;
+  }
+  .leg-pend {
+    background: #ffe4e6;
+    color: #be123c;
+    border-color: #fecdd3;
+  }
+  .leg-circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+  }
+  .progress-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .bar-container {
+    width: 240px;
+    height: 16px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #cbd5e1;
+  }
+  .bar-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+    border-radius: 8px;
+  }
+  .progress-text {
+    font-size: 9.4pt;
+    font-weight: 700;
+    color: #0f172a;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <div class="header">
+    <div class="header-left">
+      <img src="data:image/png;base64,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" alt="Logo" class="logo-img">
+      <div class="title-group">
+        <h1>Project Timeline and Current Status</h1>
+        <p>11-State Autonomous Tomato Greenhouse Microclimate & Multivariable Control System</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="meta-tag">Academic Year: 2026-27</span>
+      <span class="meta-tag">Control Systems (SEM-5)</span>
+      <span class="meta-tag final">Final Submission (100% Complete)</span>
+    </div>
+  </div>
+
+  <!-- 13-Week Timeline Table -->
+  <table>
+    <thead>
+      <tr>
+        <th class="center" style="width: 48px;">Week</th>
+        <th class="center" style="width: 108px;">Dates</th>
+        <th style="width: 960px;">Main Work</th>
+        <th style="width: 490px;">Deliverables</th>
+        <th class="center" style="width: 90px;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="row-done">
+        <td class="center week-col">1</td>
+        <td class="center date-col">19 &ndash; 23 Aug</td>
+        <td class="work-col"><strong>Problem Definition & Agronomic Literature Review:</strong> Study greenhouse tomato microclimate cross-coupling, FAO-56 irrigation standards, UC Davis VRIC cultivation guidelines, and Wageningen crop models. Review published IoT tomato systems (Rai et al. 2024, Marcheriz 2023, Saxena 2025). Identify research gap: existing systems rely on threshold switching with no multivariable dynamic plant model or state-space control.</td>
+        <td class="deliv-col">Problem statement, literature review table, agronomic parameter matrix, research gap document</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">2</td>
+        <td class="center date-col">24 &ndash; 30 Aug</td>
+        <td class="work-col"><strong>11-State Coupled Dynamic Modeling & Soil Physics:</strong> Formulate coupled nonlinear differential equations for 11 plant states: moisture (<i>M</i>), air temperature (<i>T</i>), humidity (<i>H</i>), light (<i>L</i>), soil pH, EC, macronutrients (<i>N, P, K</i>), water tank level (<i>W</i>), and VOC gas. Incorporate soil hydraulic retention and drainage kinetics for 3 substrate classes (Sandy, Loamy, Clay). Derive dynamic crop transpiration rate and nutrient uptake kinetics.</td>
+        <td class="deliv-col">11-State nonlinear ODE formulation, substrate physical parameter table, transpiration models</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">3</td>
+        <td class="center date-col">31 Aug &ndash; 6 Sep</td>
+        <td class="work-col"><strong>Analytical Trim Solver & Unbiased Jacobian Linearization:</strong> Invert plant physics around nominal targets (60% <i>M</i>, 25&deg;C, 65% <i>H</i>, 15,000 lux) to establish stationary equilibrium trim: Pump 15.0%, Fan 40.0%, Mist 20.0%, Light 0.0% with residual ||<i>x&#775;</i><sub>0</sub>||<sub>&infin;</sub> = 1.25 &times; 10<sup>&minus;10</sup>. Develop numerical differencing in base MATLAB to generate Jacobian matrices <i>A</i> &isin; &#8477;<sup>11&times;11</sup> and <i>B</i> &isin; &#8477;<sup>11&times;4</sup>. Verify step linearity (&lt; 10<sup>&minus;9</sup>% error).</td>
+        <td class="deliv-col">Analytical equilibrium solver, continuous state-space matrices (<i>A, B</i>), step-perturbation linearity proof</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">4</td>
+        <td class="center date-col">7 &ndash; 13 Sep</td>
+        <td class="work-col"><strong>Modal Diagnostics, Controllability & Dual Observability:</strong> Compute open-loop poles and modal settling times. Calculate Kalman controllability matrix (rank = 4 active climate modes; soil cascades stabilizable via Kalman staircase). Formulate and mathematically prove the <strong>Dual Observability Theorem</strong>: primary 4-sensor suite yields rank = 4/11 (unobservable nutrients and water), whereas the full 11-sensor suite achieves complete state observability (rank = 11/11).</td>
+        <td class="deliv-col">S-plane modal map, Kalman controllability matrix, dual observability rank analysis & mathematical proof</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">5</td>
+        <td class="center date-col">14 &ndash; 20 Sep</td>
+        <td class="work-col"><strong>Tri-Hybrid Synthesis (Part 1 &mdash; Decentralized PID & Pole Placement):</strong> Implement 4 independent SISO PID loops (<i>M</i> &rarr; Pump, <i>T</i> &rarr; Fan, <i>H</i> &rarr; Mist, <i>L</i> &rarr; Light) with conditional anti-windup clamping. Develop pure base MATLAB Sylvester equation solver for Scaled Subspace Pole Placement; place active environmental poles at &lambda; = {&minus;0.6, &minus;0.8, &minus;1.0, &minus;1.2} h<sup>&minus;1</sup>; enforce feedback gain bounds (|<i>K<sub>ij</sub></i>| &le; 0.2167), eradicating high-gain chattering.</td>
+        <td class="deliv-col">Discrete multi-loop PID routine, bounded pole placement gain matrix (<i>K</i><sub>PP</sub>), eigenvalue assignment code</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">6</td>
+        <td class="center date-col">21 &ndash; 27 Sep</td>
+        <td class="work-col"><strong>Tri-Hybrid Synthesis (Part 2 &mdash; Optimal Multivariable LQR-I):</strong> Formulate augmented 15-state space (11 plant states + 4 error integrators). Implement custom Hamiltonian Real Ordered Schur solver in base MATLAB (no Control System Toolbox) to solve the Continuous Algebraic Riccati Equation (CARE residual norm = 1.97 &times; 10<sup>&minus;10</sup>). Synthesize state gain <i>K<sub>x</sub></i> and integral gain <i>K<sub>z</sub></i> to coordinate all actuators and guarantee asymptotic zero steady-state error.</td>
+        <td class="deliv-col">Hamiltonian Schur CARE solver, augmented optimal gain matrix (<i>K<sub>a</sub></i> = [<i>K<sub>x</sub></i> &nbsp; <i>K<sub>z</sub></i>]), LQR-I synthesis script</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">7</td>
+        <td class="center date-col">28 Sep &ndash; 4 Oct</td>
+        <td class="work-col"><strong>Disturbance Modeling, Growth Schedulers & Safety Interlocks:</strong> Code realistic 24-hour diurnal environmental disturbance profiles (ambient temp cycle 18&ndash;29&deg;C, natural irradiance peaking at 22,000 lux, solar evaporation rate). Program dynamic 5-stage agronomic setpoint transitions across Germination, Vegetative, Flowering, Fruit Dev, and Maturity. Integrate physical actuator saturation bounds ([0, 1]) and reservoir low-water safety pump cutoff (<i>W</i> &lt; 10%).</td>
+        <td class="deliv-col">Diurnal disturbance generator, dynamic 5-phase growth setpoint scheduler, actuator safety interlock logic</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">8</td>
+        <td class="center date-col">5 &ndash; 11 Oct</td>
+        <td class="work-col"><strong>Crop Condition Index (CCI) & Master Simulation Baseline:</strong> Formulate composite physiological crop health index based on FAO-56 asymmetric tolerance bands (CCI = 0.50&times;Env + 0.25&times;Soil + 0.25&times;Nutr). Synthesize complete closed-loop master simulation (<code>main.m</code>) with simulated Gaussian transducer noise (&sigma;). Execute 24-hour benchmark comparisons evaluating Total ISE, Total IAE, Actuator Total Variation (TV), and Mean CCI across all 3 controllers.</td>
+        <td class="deliv-col">Master simulation script (<code>main.m</code>), baseline benchmark dataset (<code>master_simulation_results.mat</code>), 5 core dashboard figures</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">9</td>
+        <td class="center date-col">12 &ndash; 18 Oct</td>
+        <td class="work-col"><strong>Simulink Model Architecture & Subsystem Generation:</strong> Develop <code>build_tomato_simulink_main.m</code> to programmatically assemble the complete Simulink digital twin (<code>Tomato_Crop_Control_Main.slx</code>) using MATLAB Function blocks. Construct 7 modular subsystems: <code>01_Growth_Stage</code>, <code>02_Disturbance_Generator</code>, <code>03_Sensor_Layer</code>, <code>04_Controller_PID_PP_LQRI</code>, <code>05_Safety_Actuators</code>, <code>06_Tomato_Plant</code>, and <code>07_Crop_Condition_Index</code> with Unit Delay state memory (<i>T<sub>s</sub></i> = 0.01 h).</td>
+        <td class="deliv-col">Programmatic Simulink model builder (<code>build_tomato_simulink_main.m</code>), compiled 7-subsystem model (<code>.slx</code>)</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">10</td>
+        <td class="center date-col">19 &ndash; 25 Oct</td>
+        <td class="work-col"><strong>Simulink Model Execution, Model Workspace Wiring & Logging:</strong> Configure fixed-step discrete solver (<i>T<sub>s</sub></i> = 0.01 h, 2,401 steps over 24 h). Embed parameters into Model Workspace (<code>x0</code>, <code>Ts</code>, <code>ctrlType</code>, <code>sensorNoise</code>). Wire runtime controller selection (1=PID, 2=Pole Placement, 3=LQR-I), real-time scopes, and workspace logging sinks. Verify diagram compilation with zero algebraic loops and zero dimension mismatch errors.</td>
+        <td class="deliv-col">Configured & validated Simulink model, real-time scope instrumentation, timeseries signal logging harness</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">11</td>
+        <td class="center date-col">26 Oct &ndash; 1 Nov</td>
+        <td class="work-col"><strong>LQR-I Anti-Windup Diagnosis & Numerical Bug Fix:</strong> Diagnose and resolve the actuator locking bug where the ventilation fan locked at 100% duty cycle during Stage 5 (<i>t</i> &gt; 18 h), dropping room temperature to 18.6&deg;C. Reformulate anti-windup clamping to account for negative cooling loop gain (<i>K<sub>i</sub></i>(2,2) = &minus;1.57): push = &minus;<i>K<sub>z</sub></i>(<i>j,j</i>) &middot; <i>y</i><sub>err</sub>(<i>j</i>). Apply correction across MATLAB and Simulink, unlocking the fan, dropping temperature error from 3.8% to 1.67%, and reducing IAE from 5,863.56 to 5,460.85.</td>
+        <td class="deliv-col">Corrected anti-windup logic, modulated fan response trajectories, bug fix verification report</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">12</td>
+        <td class="center date-col">2 &ndash; 8 Nov</td>
+        <td class="work-col"><strong>Cross-Validation with Literature & Sample-for-Sample Proof:</strong> Execute full Simulink benchmark and compare against <code>main.m</code> baseline, achieving exact sample-for-sample numerical agreement (&lt; 7.3 &times; 10<sup>&minus;12</sup> error). Benchmark against published literature (Rai et al. 2024, Marcheriz 2023, Saxena 2025, and IJABE 2025 greenhouse LQR study). Formulate unit-free error indices (% setpoint: Moisture 7.29%, Temp 1.67%, Humidity 4.61%, Light 1.54%). Prove that LQR-I reduces tracking error variance by <strong>89.7%</strong> over PID.</td>
+        <td class="deliv-col">Literature comparison matrix, verified benchmark dataset (<code>simulink_main_results.mat</code>), formal validation report (<code>Tomato_Crop_Control_Validation.pdf</code>)</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+      <tr class="row-done">
+        <td class="center week-col">13</td>
+        <td class="center date-col">9 &ndash; 15 Nov</td>
+        <td class="work-col"><strong>Final Dashboards, Comprehensive Documentation & Submission:</strong> Export all 8 publication-grade visualization dashboards (<code>results/</code>). Update master documentation suite (<code>README.md</code>, <code>END_SEM_PLAN.md</code>, <code>PSEUDO.md</code>, <code>PSEUDOCODE.md</code>). Compile comprehensive viva defense guide (<code>prep.md</code>). Synchronize repository and prepare final presentation defense.</td>
+        <td class="deliv-col">Complete 8-figure publication dashboard suite, master project documentation, viva preparation guide (<code>prep.md</code>), final project release</td>
+        <td class="center status-col"><span class="status-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Done</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Bottom Footer Bar -->
+  <div class="footer">
+    <div class="legend-group">
+      <div class="legend-item leg-done">
+        <span class="leg-circle" style="background: #16a34a; color: white;">&#10004;</span>
+        <span>= Done / Completed</span>
+      </div>
+      <div class="legend-item leg-prog">
+        <span class="leg-circle" style="background: #ca8a04; color: white;">&#9203;</span>
+        <span>= In Progress / Ongoing</span>
+      </div>
+      <div class="legend-item leg-pend">
+        <span class="leg-circle" style="background: #e11d48; color: white;">&#8987;</span>
+        <span>= Pending / Not Started</span>
+      </div>
+    </div>
+    <div class="progress-box">
+      <div class="bar-container">
+        <div class="bar-fill"></div>
+      </div>
+      <span class="progress-text">13 / 13 Weeks Completed (100%) &bull; Final Submission Ready</span>
+    </div>
+  </div>
+
+</body>
+</html>
